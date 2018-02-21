@@ -1,5 +1,5 @@
 # Color-MIP Mask Search
-The algorithm is created by Hideo Otsuna.  
+The algorithm created by Hideo Otsuna.  
 FIJI plugins created by Hideo Otsuna and Takashi Kawase.  
 This documentation wrote by Justine X Chia.  
 
