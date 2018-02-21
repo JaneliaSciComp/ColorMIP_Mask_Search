@@ -89,9 +89,12 @@ public class Slice_Label_Search implements PlugInFilter
 		}
 
 		int posislice2=dcStack.size();
-		newimp = new ImagePlus(posislice2+" Search_results of "+SearchWord, dcStack);
-		
-		newimp.show();
+		if (posislice2 > 0) {
+			newimp = new ImagePlus(posislice2+" Search_results of "+SearchWord, dcStack);
+			newimp.show();
+		} else {
+			IJ.error("No results found.");
+		}
 		
 	}
 }
