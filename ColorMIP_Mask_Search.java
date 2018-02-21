@@ -541,25 +541,28 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		gd.addNumericField("% of Positive PX Threshold 0-100 %", pixThres, 2);
 		gd.addSlider("Pix Color Fluctuation, 1.18 per slice", 0, 20, pixflu);
 		
-		gd.addNumericField("Duplicated line numbers; (only for GMR & VT), 0 = no check", dupline, 0);
+		String[] dupnumstr = new String[11];
+		for (int i = 0; i < dupnumstr.length; i++)
+			dupnumstr[i] = Integer.toString(i);
+		gd.addChoice("Duplicated line numbers; (only for GMR & VT), 0 = no check", dupnumstr, dupnumstr[dupline]); //Mask
 		
-		gd.setInsets(0, 372, 0);
-		gd.addCheckbox("Show Duplication log",DUPlogon);
+		//gd.setInsets(0, 372, 0);
+		//gd.addCheckbox("Show Duplication log",DUPlogon);
 		
-		gd.setInsets(0, 362, 5);
-		String []	ColorDis = {"Combine", "Two windows"};
-		gd.addRadioButtonGroup("Result windows", ColorDis, 1, 2, ColorDis[colormethod]);
+		//gd.setInsets(0, 362, 5);
+		//String []	ColorDis = {"Combine", "Two windows"};
+		//gd.addRadioButtonGroup("Result windows", ColorDis, 1, 2, ColorDis[colormethod]);
 		
-		gd.setInsets(0, 362, 5);
-		String []	labelmethodST = {"overlap value", "overlap value + line name"};
-		gd.addRadioButtonGroup("Slice sorting method; ", labelmethodST, 1, 2, labelmethodST[labelmethod]);
+		//gd.setInsets(0, 362, 5);
+		//String []	labelmethodST = {"overlap value", "overlap value + line name"};
+		//gd.addRadioButtonGroup("Slice sorting method; ", labelmethodST, 1, 2, labelmethodST[labelmethod]);
 		
 		gd.setInsets(0, 362, 5);
 		String []	NumberST = {"%", "absolute value"};
 		gd.addRadioButtonGroup("Scoring method; ", NumberST, 1, 2, NumberST[NumberSTint]);
 		
 		gd.setInsets(20, 372, 0);
-		gd.addCheckbox("Show normal log",logon);
+		gd.addCheckbox("Show log",logon);
 		
 		gd.setInsets(20, 372, 0);
 		gd.addCheckbox("Clear memory before search. Slow at beginning but fast search",GCON);
@@ -582,11 +585,11 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		Thres=(int)gd.getNextNumber();
 		pixThres=(double)gd.getNextNumber();
 		pixflu=(double)gd.getNextNumber();
-		dupline=(int)gd.getNextNumber();
-		DUPlogon = gd.getNextBoolean();
+		dupline=Integer.parseInt(dupnumstr[gd.getNextChoiceIndex()]);
+		DUPlogon = false;
 		
-		String thremethodSTR=(String)gd.getNextRadioButton();
-		String labelmethodSTR=(String)gd.getNextRadioButton();
+		String thremethodSTR="Two windows";
+		String labelmethodSTR="overlap value + line name";
 		String ScoringM=(String)gd.getNextRadioButton();
 		logon = gd.getNextBoolean();
 		GCON = gd.getNextBoolean();
