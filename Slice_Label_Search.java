@@ -64,19 +64,26 @@ public class Slice_Label_Search implements PlugInFilter
 			return;
 		}
 		
-		
-		
 		ImageStack dcStack = new ImageStack (width,height);
-	
-		for(int SliceScan=1; SliceScan<=slicenumber; SliceScan++){
-			IJ.showProgress((double)SliceScan / (double)slicenumber);
-			
-			Label = st1.getSliceLabel(SliceScan);
-		//	IJ.log("Label; "+Label+"   SearchWord; "+SearchWord);
-			int Check=(Label.indexOf(SearchWord));
-			
+		
+		if (slicenumber > 1) {
+			for(int SliceScan=1; SliceScan<=slicenumber; SliceScan++){
+				IJ.showProgress((double)SliceScan / (double)slicenumber);
+				
+				Label = st1.getSliceLabel(SliceScan);
+				//IJ.log("Label; "+Label+"   SearchWord; "+SearchWord);
+				int Check= Label != null ? (Label.indexOf(SearchWord)) : -1;
+				
+				if(Check!=-1){
+					ip1 = st1.getProcessor(SliceScan); //Mask
+					dcStack.addSlice(Label, ip1);
+				}
+			}
+		} else {
+			int Check= imp.getTitle().indexOf(SearchWord);
+				
 			if(Check!=-1){
-				ip1 = st1.getProcessor(SliceScan); //Mask
+				ip1 = imp.getProcessor();
 				dcStack.addSlice(Label, ip1);
 			}
 		}
