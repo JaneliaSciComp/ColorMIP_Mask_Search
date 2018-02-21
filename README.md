@@ -22,6 +22,7 @@ _nb: the examples are from searching AD from the VT lines for neurons to mask, b
 
 ## Search stacks with mask
 Plugins > ColorMIP Mask search  
+![ScreenShot0](../images/scr0.png)
 ### considerations/ tips:
  - Show log // -> show NaN for log may be useful for a first pass, just to keep track of all slices
  - threshold for data: 30-50 is a good place to start for VT, 50 for GMR
@@ -33,8 +34,10 @@ Plugins > ColorMIP Mask search
 masks (e.g. AD) and hits (e.g. DBD) are output into a separate stacks. synchronizing the stacks is useful.  
  1. Analyze > Tools > Synchronize Windows  
  2. Select the two windows to synchronize  
+ ![ScreenShot1](../images/scr1.png)
 <!-- dummy -->
 A red x (cross-hair) will now appear at the same position in both stacks; scrolling through one stack will automatically advance the other stack  
+ ![ScreenShot2](../images/scr2.png)
 
 ## Create a list of candidate lines
 `realtime_Result_ctrl_click_substack.ijm` is useful for quickly making a list of lines while scrolling through the stack of potential hits 
