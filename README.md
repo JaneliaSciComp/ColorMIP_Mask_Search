@@ -6,8 +6,8 @@ This documentation wrote by Justine X Chia (UCSF).
 
 ## Before starting
  1. launch and update FIJI
- 2. drag-and-drop `ColorMIP_Mask_Search.jar` and `Slice_Label_Search.jar` on FIJI then quit  
- (you can get the .jar files from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/releases)) 
+ 2. drag and drop `ColorMIP_Mask_Search.jar` on FIJI then quit  
+ (you can get the .jar file from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/releases)) 
 
 ## Startup
 drag folder (eg. containing Gal4 color depth MIPs) into fiji, use virtual stack  
