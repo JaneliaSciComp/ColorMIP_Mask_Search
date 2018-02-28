@@ -15,7 +15,7 @@ drag folder (eg. containing Gal4 color depth MIPs) into fiji, use virtual stack
 _the examples are searching a neuron from the Gal4 color depth MIP image dataset_
 
 ## Create mask of neuron of interest
- 1. duplicate a slice containing the neuron (⌘⇧ D)
+ 1. duplicate a single slice that containing the neuron (⌘⇧ D)
  2. trace area of interest on duplicated slice (use polygon tool and try to be as accurate as possible)
  3. Edit > Clear Outside  
 
