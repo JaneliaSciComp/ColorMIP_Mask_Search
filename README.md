@@ -1,38 +1,36 @@
 # Color-MIP Mask Search [![LinkToJanelia](../images/jrc_logo_180x40.png)](https://www.janelia.org)
 The algorithm created by Hideo Otsuna.  
 FIJI plugins created by Hideo Otsuna and Takashi Kawase.  
-This documentation wrote by Justine X Chia.  
+This documentation wrote by Justine X Chia (UCSF).  
 
 
 ## Before starting
  1. update FIJI then quit
- 2. in the Applications folder, get package contents of FIJI
- 3. add Color_MIP_plugins folder and ColorMIP_Mask_Search.class to the plugins folder
+ 2. in the Fiji Applications folder, get package contents of FIJI
+ 3. add ColorMIP_Mask_Search.jar to the plugins folder
  4. add PsychedelicRainBow2.lut to the lut folder
 
 ## Startup
-drag folder (eg. containing AD) into fiji, use virtual stack  
-_nb: the examples are from searching AD from the VT lines for neurons to mask, but DBD works as well_
+drag folder (eg. containing Gal4 color depth MIPs) into fiji, use virtual stack  
+_the examples are searching a neuron from the Gal4 color depth MIP image dataset_
 
 ## Create mask of neuron of interest
- 1. duplicate the slice containing the neuron (⌘⇧ D)
+ 1. duplicate a slice containing the neuron (⌘⇧ D)
  2. trace area of interest on duplicated slice (use polygon tool and try to be as accurate as possible)
- 3. Edit > Selection > Make Inverse  
- (if this is the first time, select black area with dropper)
- 4. fill the background black (⌘ F)
+ 3. Edit > Clear Outside  
 
 ## Search stacks with mask
 Plugins > ColorMIP Mask search  
 ![ScreenShot0](../images/scr0.png)
 ### considerations/ tips:
  - Show log // -> show NaN for log may be useful for a first pass, just to keep track of all slices
- - threshold for data: 30-50 is a good place to start for VT, 50 for GMR
+ - threshold for data: 30-60 is a good place to start for searching Gal4
  - if background is too high, decrease threshold (max value is 255)  
  - if too many hits, can try increasing % of Positive PX Threshold 0-100% (eg. to 10%) – I was running out of memory on my laptop
  - if you run out of memory, you can stop the search early by pushing esc
 
 ## Synchronize windows
-masks (e.g. AD) and hits (e.g. DBD) are output into a separate stacks. synchronizing the stacks is useful.  
+masks (the neuron) and hits (Gal4 lines) are output into a separate stacks. synchronizing the stacks is useful.  
  1. Analyze > Tools > Synchronize Windows  
  2. Select the two windows to synchronize  
 <!-- dummy -->
