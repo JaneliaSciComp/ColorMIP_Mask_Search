@@ -1,7 +1,8 @@
-# Color-MIP Mask Search
+# Color-MIP Mask Search [![LinkToJanelia](../images/jrc_logo_180x40.png)](https://www.janelia.org)
 The algorithm created by Hideo Otsuna.  
 FIJI plugins created by Hideo Otsuna and Takashi Kawase.  
 This documentation wrote by Justine X Chia.  
+
 
 ## Before starting
  1. update FIJI then quit
