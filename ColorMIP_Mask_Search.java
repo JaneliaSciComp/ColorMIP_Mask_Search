@@ -711,7 +711,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 				negmaskposi_mirror[i] = val + (width-1) - 2*x;
 			}
 		}
-		
+		
+
 		int maskpos_st = negmaskposi != null ? Math.min(maskposi[0], negmaskposi[0])*3 : maskposi[0]*3;
 		int maskpos_ed = negmaskposi != null ? Math.max(maskposi[masksize-1], negmaskposi[negmasksize-1])*3 : maskposi[masksize-1]*3;
 		int stripsize = maskpos_ed-maskpos_st+3;
@@ -855,7 +856,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 							
 							int posi = calc_score(ip1, maskposi, impxs, maskposi, Thres, pixfludub, colocs);
 							double posipersent= (double) posi/ (double) masksize;
-							if (nip1 != null) {
+							
+if (nip1 != null) {
 								int nega = calc_score(nip1, negmaskposi, impxs, negmaskposi, Thres, pixfludub, null);
 								double negapersent= (double) nega/ (double) negmasksize;
 								posipersent -= negapersent;
@@ -932,7 +934,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 					
 					int posi = calc_score(ip1, maskposi, ip3, maskposi, Thres, pixfludub, ShowCo ? ipnew : null);
 					double posipersent= (double) posi/ (double) masksize;
-					if (nip1 != null) {
+					
+if (nip1 != null) {
 						int nega = calc_score(nip1, negmaskposi, ip3, negmaskposi, Thres, pixfludub, null);
 						double negapersent= (double) nega/ (double) negmasksize;
 						posipersent -= negapersent;
@@ -1016,9 +1019,15 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 				linenameTmpo = srlabels.get(CreateLineArray);
 				
 				int GMRPosi=(linenameTmpo.indexOf("GMR"));
-				int VTPosi=(linenameTmpo.indexOf("VT"));
+				int RPosi=(linenameTmpo.indexOf("R"));
 				
-				if(GMRPosi!=-1){// it is GMR 
+				int VTPosi=(linenameTmpo.indexOf("VT"));
+				if(RPosi!=-1 && GMRPosi==-1){// it is R
+
+					int UnderS2=(linenameTmpo.indexOf("_", RPosi ));// end of line number
+					
+					LineNo=linenameTmpo.substring(RPosi, UnderS2);// GMR_01A02
+				}else if(GMRPosi!=-1){// it is GMR 
 					int UnderS1=(linenameTmpo.indexOf("_", GMRPosi+1));
 					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
 					
