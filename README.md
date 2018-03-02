@@ -5,41 +5,42 @@ This documentation wrote by Justine X Chia (UCSF).
 
 
 ## Before starting
- 1. launch and update FIJI
- 2. drag and drop `ColorMIP_Mask_Search.jar` on FIJI then quit  
+ 1. Launch and update FIJI.
+ 2. Drag and drop `ColorMIP_Mask_Search.jar` on FIJI then quit (the plugin installation).  
  (you can get the .jar file from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/releases)) 
 
 ## Startup
-drag folder (eg. containing Gal4 color depth MIPs) into fiji, use virtual stack  
-_the examples are searching a neuron from the Gal4 color depth MIP image dataset_
+Drag folder (containing Gal4 color depth MIPs) into fiji, use virtual stack option. 
 
 ## Create mask of neuron of interest
- 1. duplicate a single slice that containing the neuron (⌘⇧ D)
- 2. trace area of interest on duplicated slice (use polygon tool and try to be as accurate as possible)
- 3. Edit > Clear Outside  
+ 1. Duplicate a single slice that containing the neuron from the Gal4 image (⌘⇧ D).
+ 2. Trace area of interest on a duplicated slice (use polygon tool and try to be as accurate as possible).
+ 3. Edit > Clear Outside.
 
 ## Search stacks with mask
 Plugins > ColorMIP Mask search  
 ![ScreenShot0](../images/scr0.png)
 ### considerations/ tips:
- - Show log // -> show NaN for log may be useful for a first pass, just to keep track of all slices
- - threshold for data: 30-60 is a good place to start for searching Gal4
- - if background is too high, decrease threshold (max value is 255)  
- - if too many hits, can try increasing % of Positive PX Threshold 5-10%
- - if you run out of memory, you can stop the search early by pushing esc
+ - Show log // -> show NaN for log may be useful for a first pass, just to keep track of all slices.
+ - Threshold for data: 30-60 is a good place to start for searching Gal4.
+ - If background is too high, increase threshold (max value is 255).  
+ - If too many hits, can try increasing % of Positive PX Threshold 5-10%.
+ - The search can stop by pushing escape.
 
 ## Synchronize windows
-masks (the neuron) and hits (Gal4 lines) are output into a separate stacks. synchronizing the stacks is useful.
- 1. Analyze > Tools > Synchronize Windows  
- 2. Select the two windows to synchronize  
+To make sure the position between the mask (the neuron) and hits (Gal4 lines), synchronizing the wingdows is useful function.
+ 1. Analyze > Tools > Synchronize Windows.  
+ 2. Select the two windows to synchronize.  
 <!-- dummy -->
 ![ScreenShot1](../images/scr1.png)  
 <br />
-A red x (cross-hair) will now appear at the same position in both stacks; scrolling through one stack will automatically advance the other stack  
+A red x (cross-hair) will now appear at the same position in both images.
 ![ScreenShot2](../images/scr2.png)
 
 ## Create a list of candidate lines
-`realtime_Result_ctrl_click_substack.ijm` is useful for quickly making a list of lines while scrolling through the stack of potential hits 
- 1. open `realtime_Result_ctrl_click_substack.ijm`
- 2. click window with colorMIP stacks (e.g. `Original_RGB_5.- %reformatted`)
- 3. run macro (only accepts one open window)
+`realtime_Result_ctrl_click_substack.ijm` is useful for quickly making a list of lines and the substack while scrolling through the stack of potential hits. 
+ 1. Open `realtime_Result_ctrl_click_substack.ijm`.
+ 2. Click window with colorMIP search result stacks.
+ 3. Run macro (only accepts one open window). Then Result window will be open.
+ 4. Shift + click on the result stack will add the image name into the Result table.
+ 5. ctrl + click will create a substack with the Result table from the result stack.
