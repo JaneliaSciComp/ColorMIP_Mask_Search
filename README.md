@@ -35,7 +35,7 @@ To make sure the position between the mask (the neuron) and hits (Gal4 lines), s
 ![ScreenShot1](../images/scr1.png)  
 <br />
 A red x (cross-hair) will now appear at the same position in both images.
-![ScreenShot2](../images/scr2.png)
+![ScreenShot2](../images/scr3.jpg)
 
 ## Create a list of candidate lines
 `realtime_Result_ctrl_click_substack.ijm` is useful for quickly making a list of lines and the substack while scrolling through the stack of potential hits. 
