@@ -25,11 +25,11 @@ Plugins > ColorMIP Mask search
  - Show log // -> show NaN for log may be useful for a first pass, just to keep track of all slices
  - threshold for data: 30-60 is a good place to start for searching Gal4
  - if background is too high, decrease threshold (max value is 255)  
- - if too many hits, can try increasing % of Positive PX Threshold 0-100% (eg. to 10%) – I was running out of memory on my laptop
+ - if too many hits, can try increasing % of Positive PX Threshold 5-10%
  - if you run out of memory, you can stop the search early by pushing esc
 
 ## Synchronize windows
-masks (the neuron) and hits (Gal4 lines) are output into a separate stacks. synchronizing the stacks is useful.  
+masks (the neuron) and hits (Gal4 lines) are output into a separate stacks. synchronizing the stacks is useful.
  1. Analyze > Tools > Synchronize Windows  
  2. Select the two windows to synchronize  
 <!-- dummy -->
