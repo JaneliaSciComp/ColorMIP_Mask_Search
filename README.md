@@ -10,7 +10,7 @@ This manual is modified based on the instruction developed by Justine X Chia (UC
  (you can get the .jar file from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/releases)) 
 
 ## Startup
-Drag folder (containing Gal4 color depth MIPs) into fiji, use virtual stack option. 
+Drag the folder (containing Gal4 color depth MIPs) into fiji, use virtual stack option. 
 
 ## Create mask of neuron of interest
  1. Duplicate a single slice that containing the neuron from the Gal4 image (⌘⇧ D).
