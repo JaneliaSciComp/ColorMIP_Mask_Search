@@ -85,6 +85,24 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		return pos.stream().mapToInt(i -> i).toArray();
 	}
 
+	public int[] shift_mskpos_array(int[] src, int xshift, int yshift, int w, int h){
+		ArrayList<Integer> pos = new ArrayList<Integer>();
+		int x, y, z;
+		int ypitch = w;
+		int zpitch = h*w;
+		for(int i = 0; i < src.length; i++) {
+			int val = src[i];
+			x = (val % ypitch) + xshift;
+			y = val / ypitch + yshift;
+			if (x >= 0 && x < w && y >= 0 && y < h)
+				pos.add(y*w+x);
+			else
+				pos.add(-1);
+		}
+		return pos.stream().mapToInt(i -> i).toArray();
+	}
+
+
 	public String getZeroFilledNumString(int num, int digit) {
 		String stri = Integer.toString(num);
 		if (stri.length() < digit) {
@@ -117,9 +135,9 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//IJ.log(" linename;"+linename);
 		int posi = 0;
 		for(int masksig=0; masksig<masksize; masksig++){
+			if (srcmaskposi[masksig] == -1 || tarmaskposi[masksig] == -1) continue;
 			
 			int pix1= src.get(srcmaskposi[masksig]);
-			
 			int red1 = (pix1>>>16) & 0xff;
 			int green1 = (pix1>>>8) & 0xff;
 			int blue1 = pix1 & 0xff;
@@ -158,6 +176,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//IJ.log(" linename;"+linename);
 		int posi = 0;
 		for(int masksig=0; masksig<masksize; masksig++){
+			if (srcmaskposi[masksig] == -1 || tarmaskposi[masksig] == -1) continue;
 			
 			int pix1= src.get(srcmaskposi[masksig]);
 			int red1 = (pix1>>>16) & 0xff;
@@ -456,6 +475,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		int dupline=(int)Prefs.get("dupline.int",2);
 		int colormethod=(int)Prefs.get("colormethod.int",1);
 		double pixflu=(double)Prefs.get("pixflu.double",2);
+		int xyshift=(int)Prefs.get("xyshift.int",0);
 		boolean logon=(boolean)Prefs.get("logon.boolean",false);
 		int Thresm=(int)Prefs.get("Thresm.int",50);
 		int NegThresm=(int)Prefs.get("NegThresm.int",50);
@@ -540,7 +560,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//	gd.addSlider("100x % of Positive PX Threshold", (double) 0, (double) 10000, pixThres);
 		gd.addNumericField("% of Positive PX Threshold 0-100 %", pixThres, 2);
 		gd.addSlider("Pix Color Fluctuation, 1.18 per slice", 0, 20, pixflu);
-		
+				
 		String[] dupnumstr = new String[11];
 		for (int i = 0; i < dupnumstr.length; i++)
 			dupnumstr[i] = Integer.toString(i);
@@ -556,6 +576,10 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//gd.setInsets(0, 362, 5);
 		//String []	labelmethodST = {"overlap value", "overlap value + line name"};
 		//gd.addRadioButtonGroup("Slice sorting method; ", labelmethodST, 1, 2, labelmethodST[labelmethod]);
+
+		gd.setInsets(0, 362, 5);
+		String []	labelmethodST = {"0px    ", "2px    ", "4px    "};
+		gd.addRadioButtonGroup("XY Shift: ", labelmethodST, 1, 3, labelmethodST[labelmethod]);
 		
 		gd.setInsets(0, 362, 5);
 		String []	NumberST = {"%", "absolute value"};
@@ -587,7 +611,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		pixflu=(double)gd.getNextNumber();
 		dupline=Integer.parseInt(dupnumstr[gd.getNextChoiceIndex()]);
 		DUPlogon = false;
-		
+		xyshift=Integer.parseInt( ((String)gd.getNextRadioButton()).substring(0,1) );
+				
 		String thremethodSTR="Two windows";
 		String labelmethodSTR="overlap value + line name";
 		String ScoringM=(String)gd.getNextRadioButton();
@@ -637,6 +662,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		Prefs.set("datafile.int",datafile);
 		Prefs.set("colormethod.int",colormethod);
 		Prefs.set("pixflu.double", pixflu);
+		Prefs.set("xyshift.int",xyshift);
 		Prefs.set("logon.boolean",logon);
 		Prefs.set("labelmethod.int",labelmethod);
 		Prefs.set("DUPlogon.boolean",DUPlogon);
@@ -686,35 +712,72 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		int [] negmaskposi = nip1 != null ? get_mskpos_array(nip1, NegThresm) : null;
 		int masksize = maskposi.length;
 		int negmasksize = nip1 != null ? negmaskposi.length : 0;
-		int [] maskposi_mirror = null;
-		int [] negmaskposi_mirror = null;
+		
+		int [][] maskposilist = new int[1+(xyshift/2)*8][];
+		int [][] negmaskposilist = new int[1+(xyshift/2)*8][];
+		int [][] maskposilist_mirror = new int[1+(xyshift/2)*8][];
+		int [][] negmaskposilist_mirror = new int[1+(xyshift/2)*8][];
+
+		maskposilist[0] = maskposi;
+		if (negmaskposi == null) negmaskposilist = null;
+		else negmaskposilist[0] = negmaskposi;
+
+		int maskid = 0;
+		if (xyshift >= 2) {
+			for (int xx = -2; xx <= 2; xx += 2) {
+				for (int yy = -2; yy <= 2; yy += 2) {
+					maskposilist[maskid] = shift_mskpos_array(maskposi, xx, yy, width, height);
+					if (negmaskposilist != null)
+						negmaskposilist[maskid] = shift_mskpos_array(negmaskposi, xx, yy, width, height);
+					maskid++;
+				}
+			}
+		}
+		if (xyshift >= 4) {
+			for (int xx = -4; xx <= 4; xx += 4) {
+				for (int yy = -4; yy <= 4; yy += 4) {
+					if (xx == 0 && yy == 0) continue;
+					maskposilist[maskid] = shift_mskpos_array(maskposi, xx, yy, width, height);
+					if (negmaskposilist != null)
+						negmaskposilist[maskid] = shift_mskpos_array(negmaskposi, xx, yy, width, height);
+					maskid++;
+				}
+			}
+		}
 		
 		if (mirror_mask && maskposi != null) {
-			maskposi_mirror = maskposi.clone();
 			int x, y, z;
 			int ypitch = width;
 			int zpitch = height*width;
-			for(int i = 0; i < masksize; i++) {
-				int val = maskposi[i];
-				x = val % ypitch;
-				maskposi_mirror[i] = val + (width-1) - 2*x;
+			for (int i = 0; i < maskposilist.length; i++) {
+				maskposilist_mirror[i] = maskposilist[i].clone();
+				for(int j = 0; j < masksize; j++) {
+					int val = maskposilist[i][j];
+					x = val % ypitch;
+					maskposilist_mirror[i][j] = val + (width-1) - 2*x;
+				}
 			}
-		}
+		} else
+			maskposilist_mirror = null;
+		
 		if (mirror_negmask && negmaskposi != null) {
-			negmaskposi_mirror = negmaskposi.clone();
 			int x, y, z;
 			int ypitch = width;
 			int zpitch = height*width;
-			for(int i = 0; i < negmasksize; i++) {
-				int val = negmaskposi[i];
-				x = val % ypitch;
-				negmaskposi_mirror[i] = val + (width-1) - 2*x;
+			for (int i = 0; i < negmaskposilist.length; i++) {
+				negmaskposilist_mirror[i] = negmaskposilist[i].clone();
+				for(int j = 0; j < negmasksize; j++) {
+					int val = negmaskposilist[i][j];
+					x = val % ypitch;
+					negmaskposilist_mirror[i][j] = val + (width-1) - 2*x;
+				}
 			}
-		}
+		} else
+			negmaskposilist_mirror = null;
 		
 
-		int maskpos_st = negmaskposi != null ? Math.min(maskposi[0], negmaskposi[0])*3 : maskposi[0]*3;
-		int maskpos_ed = negmaskposi != null ? Math.max(maskposi[masksize-1], negmaskposi[negmasksize-1])*3 : maskposi[masksize-1]*3;
+		int maskpos_st = negmaskposi != null ? Math.min(maskposilist[0][0], negmaskposilist[0][0])*3 : maskposilist[0][0]*3;
+		int maskpos_ed = negmaskposi != null ? Math.max(maskposilist[maskposilist.length-1][masksize-1], negmaskposilist[negmaskposilist.length-1][negmasksize-1])*3 : maskposilist[maskposilist.length-1][masksize-1]*3;
 		int stripsize = maskpos_ed-maskpos_st+3;
 
 		long start, end;
@@ -759,31 +822,56 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 						
 						linename=st3.getSliceLabel(islice);
 						
-						int posi = calc_score(ip1, maskposi, impxs, maskposi, Thres, pixfludub, colocs);
-						double posipersent= (double) posi/ (double) masksize;
-						
+						int posi = 0;
+						double posipersent = 0.0;
+						for (int mid = 0; mid < maskposilist.length; mid++) {
+							int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist[mid], Thres, pixfludub, colocs);
+							if (tmpposi > posi) {
+								posi = tmpposi;
+								posipersent= (double) posi/ (double) masksize;
+							}
+						}
 						if (nip1 != null) {
-							int nega = calc_score(nip1, negmaskposi, impxs, negmaskposi, Thres, pixfludub, null);
-							double negapersent= (double) nega/ (double) negmasksize;
+							int nega = 0;
+							double negapersent = 0.0;
+							for (int mid = 0; mid < negmaskposilist.length; mid++) {
+								int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist[mid], Thres, pixfludub, null);
+								if (tmpnega > nega) {
+									nega = tmpnega;
+									negapersent = (double) nega/ (double) negmasksize;
+								}
+							}
 							posipersent -= negapersent;
 							posi = (int)Math.round((double)posi*(1.0-negapersent));
 						}
 
-						int mirror_posi = 0;
-						double mirror_posipersent = 0.0;
-						if (mirror_mask && maskposi_mirror != null) {
-							mirror_posi = calc_score(ip1, maskposi, impxs, maskposi_mirror, Thres, pixfludub, colocs);
-							mirror_posipersent = (double) mirror_posi/ (double) masksize;
-						}
-						if (nip1 != null && mirror_negmask && negmaskposi_mirror != null) {
-							int nega = calc_score(nip1, negmaskposi, impxs, negmaskposi_mirror, Thres, pixfludub, null);
-							double negapersent= (double) nega/ (double) negmasksize;
-							mirror_posipersent -= negapersent;
-							mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-						}
-						if (posi < mirror_posi) {
-							posi = mirror_posi;
-							posipersent = mirror_posipersent;
+						if (maskposilist_mirror != null) {
+							int mirror_posi = 0;
+							double mirror_posipersent = 0.0;
+							for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
+								int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist_mirror[mid], Thres, pixfludub, colocs);
+								if (tmpposi > mirror_posi) {
+									mirror_posi = tmpposi;
+									mirror_posipersent= (double) mirror_posi/ (double) masksize;
+								}
+							}
+							if (nip1 != null) {
+								int nega = 0;
+								double negapersent = 0.0;
+								for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
+									int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist_mirror[mid], Thres, pixfludub, null);
+									if (tmpnega > nega) {
+										nega = tmpnega;
+										negapersent = (double) nega/ (double) negmasksize;
+									}
+								}
+								mirror_posipersent -= negapersent;
+								mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
+							}
+							if (posi < mirror_posi) {
+								posi = mirror_posi;
+								posipersent = mirror_posipersent;
+							}
 						}
 						
 						if(posipersent<=pixThresdub){
@@ -854,33 +942,59 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 							
 							linename=st3.getSliceLabel(islice);
 							
-							int posi = calc_score(ip1, maskposi, impxs, maskposi, Thres, pixfludub, colocs);
-							double posipersent= (double) posi/ (double) masksize;
-							
-if (nip1 != null) {
-								int nega = calc_score(nip1, negmaskposi, impxs, negmaskposi, Thres, pixfludub, null);
-								double negapersent= (double) nega/ (double) negmasksize;
+							int posi = 0;
+							double posipersent = 0.0;
+							for (int mid = 0; mid < maskposilist.length; mid++) {
+								int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist[mid], Thres, pixfludub, colocs);
+								if (tmpposi > posi) {
+									posi = tmpposi;
+									posipersent= (double) posi/ (double) masksize;
+								}
+							}
+							if (nip1 != null) {
+								int nega = 0;
+								double negapersent = 0.0;
+								for (int mid = 0; mid < negmaskposilist.length; mid++) {
+									int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist[mid], Thres, pixfludub, null);
+									if (tmpnega > nega) {
+										nega = tmpnega;
+										negapersent = (double) nega/ (double) negmasksize;
+									}
+								}
 								posipersent -= negapersent;
 								posi = (int)Math.round((double)posi*(1.0-negapersent));
 							}
 
-							int mirror_posi = 0;
-							double mirror_posipersent = 0.0;
-							if (mirror_mask && maskposi_mirror != null) {
-								mirror_posi = calc_score(ip1, maskposi, impxs, maskposi_mirror, Thres, pixfludub, colocs);
-								mirror_posipersent = (double) mirror_posi/ (double) masksize;
-							}
-							if (nip1 != null && mirror_negmask && negmaskposi_mirror != null) {
-								int nega = calc_score(nip1, negmaskposi, impxs, negmaskposi_mirror, Thres, pixfludub, null);
-								double negapersent= (double) nega/ (double) negmasksize;
-								mirror_posipersent -= negapersent;
-								mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-							}
-							if (posi < mirror_posi) {
-								posi = mirror_posi;
-								posipersent = mirror_posipersent;
-							}
+							if (maskposilist_mirror != null) {
+								int mirror_posi = 0;
+								double mirror_posipersent = 0.0;
+								for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
+									int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist_mirror[mid], Thres, pixfludub, colocs);
+									if (tmpposi > mirror_posi) {
+										mirror_posi = tmpposi;
+										mirror_posipersent= (double) mirror_posi/ (double) masksize;
+									}
+								}
+								if (nip1 != null) {
+									int nega = 0;
+									double negapersent = 0.0;
+									for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
+										int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist_mirror[mid], Thres, pixfludub, null);
+										if (tmpnega > nega) {
+											nega = tmpnega;
+											negapersent = (double) nega/ (double) negmasksize;
+										}
+									}
+									mirror_posipersent -= negapersent;
+									mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
+								}
 							
+								if (posi < mirror_posi) {
+									posi = mirror_posi;
+									posipersent = mirror_posipersent;
+								}
+							}
+
 							if(posipersent<=pixThresdub){
 								if (logon==true && logNan==true)
 								IJ.log("NaN");
@@ -931,34 +1045,61 @@ if (nip1 != null) {
 					ColorProcessor ipnew = new ColorProcessor(width, height);
 					ip3 = st3.getProcessor(islice);// data
 					linename=st3.getSliceLabel(islice);
-					
-					int posi = calc_score(ip1, maskposi, ip3, maskposi, Thres, pixfludub, ShowCo ? ipnew : null);
-					double posipersent= (double) posi/ (double) masksize;
-					
-if (nip1 != null) {
-						int nega = calc_score(nip1, negmaskposi, ip3, negmaskposi, Thres, pixfludub, null);
-						double negapersent= (double) nega/ (double) negmasksize;
+
+					int posi = 0;
+					double posipersent = 0.0;
+						
+					for (int mid = 0; mid < maskposilist.length; mid++) {
+						int tmpposi = calc_score(ip1, maskposi, ip3, maskposilist[mid], Thres, pixfludub, ShowCo ? ipnew : null);
+						if (tmpposi > posi) {
+							posi = tmpposi;
+							posipersent= (double) posi/ (double) masksize;
+						}
+					}
+					if (nip1 != null) {
+						int nega = 0;
+						double negapersent = 0.0;
+						for (int mid = 0; mid < negmaskposilist.length; mid++) {
+							int tmpnega = calc_score(nip1, negmaskposi, ip3, negmaskposilist[mid], Thres, pixfludub, null);
+							if (tmpnega > nega) {
+								nega = tmpnega;
+								negapersent = (double) nega/ (double) negmasksize;
+							}
+						}
 						posipersent -= negapersent;
 						posi = (int)Math.round((double)posi*(1.0-negapersent));
 					}
 
-					int mirror_posi = 0;
-					double mirror_posipersent = 0.0;
-					if (mirror_mask && maskposi_mirror != null) {
-						mirror_posi = calc_score(ip1, maskposi, ip3, maskposi_mirror, Thres, pixfludub, ShowCo ? ipnew : null);
-						mirror_posipersent = (double) mirror_posi/ (double) masksize;
+					if (maskposilist_mirror != null) {
+						int mirror_posi = 0;
+						double mirror_posipersent = 0.0;
+						for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
+							int tmpposi = calc_score(ip1, maskposi, ip3, maskposilist_mirror[mid], Thres, pixfludub, ShowCo ? ipnew : null);
+							if (tmpposi > mirror_posi) {
+								mirror_posi = tmpposi;
+								mirror_posipersent= (double) mirror_posi/ (double) masksize;
+							}
+						}
+						if (nip1 != null) {
+							int nega = 0;
+							double negapersent = 0.0;
+							for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
+								int tmpnega = calc_score(nip1, negmaskposi, ip3, negmaskposilist_mirror[mid], Thres, pixfludub, null);
+								if (tmpnega > nega) {
+									nega = tmpnega;
+									negapersent = (double) nega/ (double) negmasksize;
+								}
+							}
+							mirror_posipersent -= negapersent;
+							mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
+						}
+							
+						if (posi < mirror_posi) {
+							posi = mirror_posi;
+							posipersent = mirror_posipersent;
+						}
 					}
-					if (nip1 != null && mirror_negmask && negmaskposi_mirror != null) {
-						int nega = calc_score(nip1, negmaskposi, ip3, negmaskposi_mirror, Thres, pixfludub, null);
-						double negapersent= (double) nega/ (double) negmasksize;
-						mirror_posipersent -= negapersent;
-						mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-					}
-					if (posi < mirror_posi) {
-						posi = mirror_posi;
-						posipersent = mirror_posipersent;
-					}
-					
+
 					if(posipersent<=pixThresdub){
 						if (logon==true && logNan==true)
 						IJ.log("NaN");
@@ -1509,7 +1650,7 @@ if (nip1 != null) {
 									}else{//NegativeExist==1
 										srlabels.remove(slicelabel-1);
 										
-if(DUPlogon==true)
+										if(DUPlogon==true)
 											IJ.log(dupdel+" Duplicated & deleted; 	"+weightposi[wposi]);
 										dupdel=dupdel+1;
 									}
