@@ -578,8 +578,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//gd.addRadioButtonGroup("Slice sorting method; ", labelmethodST, 1, 2, labelmethodST[labelmethod]);
 
 		gd.setInsets(0, 362, 5);
-		String []	labelmethodST = {"0px    ", "2px    ", "4px    "};
-		gd.addRadioButtonGroup("XY Shift: ", labelmethodST, 1, 3, labelmethodST[labelmethod]);
+		String []	shitstr = {"0px    ", "2px    ", "4px    "};
+		gd.addRadioButtonGroup("XY Shift: ", shitstr, 1, 3, shitstr[xyshift/2]);
 		
 		gd.setInsets(0, 362, 5);
 		String []	NumberST = {"%", "absolute value"};
