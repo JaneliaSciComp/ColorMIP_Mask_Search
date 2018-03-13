@@ -1438,7 +1438,7 @@ function mipfunction(nc82nrrd,mipbatch) {
 						}
 					}
 					
-					TimeLapseColorCoder(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand);
+					ColorDepthCreator(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand);
 					
 					if(AutoBRV==1){
 						if(sigsize>9)
@@ -2402,7 +2402,7 @@ function basicoperation(BasicMIP){
 	BasicMIP[1]=max;
 }
 
-function TimeLapseColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand) {//"Time-Lapse Color Coder" 
+function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand) {//"Time-Lapse Color Coder" 
 	
 	if(usingLUT=="royal")
 	var Glut = "royal";	//default LUT
@@ -2525,7 +2525,7 @@ function TimeLapseColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFr
 	}//if (GFrameColorScaleCheck==1){
 	run("Select All");
 	
-}//function TimeLapseColorCoder(slicesOri, applyV, width, AutoBRV, bitd) {//"Time-Lapse Color Coder" 
+}//function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd) {//"Time-Lapse Color Coder" 
 
 function CreateScale(lutstr, beginf, endf, reverse0){
 	ww = 256;
