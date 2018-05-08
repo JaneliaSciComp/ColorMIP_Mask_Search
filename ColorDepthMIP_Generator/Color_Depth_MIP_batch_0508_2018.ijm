@@ -1,5 +1,6 @@
 //Wrote by Hideo Otsuna (HHMI Janelia Research Campus), Aug 4, 2015
 
+run("Misc...", "divide=Infinity save");
 autothre=0;//1 is FIJI'S threshold, 0 is DSLT thresholding
 multiDSLT=1;// 1 is multi step DSLT for better thresholding sensitivity
 measurement="No";// Yes will measure the shape of signals (for nc82 shape database creation)
@@ -9,13 +10,14 @@ VncMaskpath=0;
 setBatchMode(true);
 compCC=0;// 1 is compressed nrrd, 0 is not compressed nrrd
 keepsubst=0; // 1 is keeoing sub folder structures
-DSLTver="normal";
+DSLTver="Line";//"normal";
 SkipDuplication=true;
 
+print("Choose a directory for aligned confocal files");
 dir = getDirectory("Choose a directory for aligned confocal files");
 
 savemethod=0;
-
+print("Choose a directory for Color MIP SAVE");
 dirCOLOR= getDirectory("Choose a directory for Color MIP SAVE");
 
 savemethod=1;
@@ -28,6 +30,8 @@ print("MIP saving place; "+dirCOLOR);
 filepath0=getDirectory("temp");//C:\Users\??\AppData\Local\Temp\...C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp\
 filepath=filepath0+"MIP_batch.txt";
 
+print("filepath; "+filepath);
+
 LF=10; TAB=9; swi=0; swi2=0; testline=0;
 exi=File.exists(filepath);
 List.clear();
@@ -39,7 +43,8 @@ CLAHE=true;
 AutoBRV=true;
 blockposition=1;
 totalblock=1;
-desiredmean=170;
+blockON=false;
+desiredmean=190;
 savestring="Save in same folder";
 colorscale=true;
 reverse0=false;
@@ -47,7 +52,7 @@ startMIP=0;
 endMIP=1000;
 usingLUT="PsychedelicRainBow2";
 manualST="All channels MIP creation";
-lowerweight=0.7;
+lowerweight=0.0;
 lowthreM="Peak Histogram";
 unsharp="NA";
 expand=false;
@@ -55,7 +60,8 @@ secondjump=210;
 UseSubfolderName=false;
 CropYN=false;
 JFRC3Dpath=0;
-nc82nrrd=0;
+nc82nrrd=true;
+tempMaskDir=0;
 
 if(exi==1){
 	s1 = File.openAsRawString(filepath);
@@ -145,75 +151,92 @@ if(exi==1){
 			DSLTver = String.buffer;
 		}else if(swi==27 && swi<=testline){
 			SkipDuplication = String.buffer;
+		}else if(swi==28 && swi<=testline){
+			tempMaskDir = String.buffer;
 		}  //swi==0 //swi==0
 	}
 	
 	
-	//	File.saveString(subfolder+"\n"+colorcoding+"\n"+CLAHE+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp, filepath);
 }
 run("Close All");
 
+JaneliaVersion=0;
+
 Dialog.create("Batch processing of the Color depth MIP creation");
-//Dialog.addCheckbox("Include sub-folder", subfolder);
-//Dialog.addCheckbox("Depth Color coding MIP", colorcoding);
+
+if(JaneliaVersion==1)
+Dialog.addCheckbox("Include sub-folder", subfolder);
+
 Dialog.addCheckbox("Automatic Brightness adjustment", AutoBRV);
-//Dialog.addCheckbox("Crop Optic Lobe", CropYN);
+
+if(JaneliaVersion==1)
+Dialog.addCheckbox("Crop Optic Lobe", CropYN);
+
 Dialog.addCheckbox("Add color scale", colorscale);
-Dialog.addCheckbox("Reversed Z-color", reverse0);
-//Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
+Dialog.addCheckbox("Reversed color", reverse0);
+
+
+Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
+
+if(JaneliaVersion==1)
 Dialog.addCheckbox("MIP craetion from all .nrrd", nc82nrrd);
 Dialog.addCheckbox("Skip MIP creation for already made in the save directory", SkipDuplication);
 
-//itemFilter=newArray("NA", "Unsharp", "Max");
-//Dialog.addRadioButtonGroup("Applying Filter", itemFilter, 1, 3, unsharp); 
-
-//item4=newArray("Manual setting 1st time only", "Automatic", "All channels MIP creation");
-//Dialog.addRadioButtonGroup("Nc82 channel discrimination method from a multi-channel stack", item4, 1, 3, manualST); 
-//Dialog.addCheckbox("LZW compression", JPGon);
-
-//item2=newArray("Save in same folder", "Choose directory");
-//Dialog.addRadioButtonGroup("Export place", item2, 1, 2, savestring); 
-
-//item3=newArray("PsychedelicRainBow2", "royal");
-//Dialog.addRadioButtonGroup("LUT type", item3, 1, 2, usingLUT); 
-
+if(JaneliaVersion==1){
+	itemFilter=newArray("NA", "Unsharp", "Max");
+	Dialog.addRadioButtonGroup("Applying Filter", itemFilter, 1, 3, unsharp); 
+}
+if(JaneliaVersion==1){
+	item4=newArray("Manual setting 1st time only", "Automatic", "All channels MIP creation");
+	Dialog.addRadioButtonGroup("Nc82 channel discrimination method from a multi-channel stack", item4, 1, 3, manualST); 
+}
 item5=newArray("Normal", "Line");
 Dialog.addRadioButtonGroup("DSLT version", item5, 1, 2, DSLTver); 
 
 Dialog.addNumber("Starting MIP slice", startMIP);
-Dialog.addNumber("Ending MIP slice, larger number will be the last slice, 1000 is until the last slice", endMIP);
+Dialog.addNumber("Ending MIP slice, larger number will be the last slice", endMIP);
 
-//Dialog.addNumber("Handling block", blockposition, 0, 0, " /Total block"); //0
-//Dialog.addNumber("Total block number 1-10", totalblock, 0, 0, ""); //0
-
+if(JaneliaVersion==1){
+	Dialog.addNumber("Handling block", blockposition, 0, 0, " /Total block"); //0
+	Dialog.addNumber("Total block number 1-10", totalblock, 0, 0, ""); //0
+}
 Dialog.show();
 
-//subfolder=Dialog.getCheckbox();// supporting sub folders
-//colorcoding=Dialog.getCheckbox();//color depth MIP
+if(JaneliaVersion==1)
+subfolder=Dialog.getCheckbox();// supporting sub folders
+
 AutoBRV=Dialog.getCheckbox();//auto-brightness adjustment
-//CropYN=Dialog.getCheckbox();//crop
-//blockmode=Dialog.getCheckbox();//block mode for larger number of files
+
+if(JaneliaVersion==1)
+CropYN=Dialog.getCheckbox();//crop
+
 colorscale=Dialog.getCheckbox();//adding color depth scale bar
 reverse0=Dialog.getCheckbox();//reverse color for front back inverted signal
-//expand=Dialog.getCheckbox();
+
+
+expand=Dialog.getCheckbox();
+
+if(JaneliaVersion==1)
 nc82nrrd=Dialog.getCheckbox();
 SkipDuplication=Dialog.getCheckbox();
 
-//unsharp= Dialog.getRadioButton();
-//manualST= Dialog.getRadioButton();//manually neuron channel set only for 1 st time
-//savestring = Dialog.getRadioButton();//saving place
+if(JaneliaVersion==1){
+	unsharp= Dialog.getRadioButton();
+	manualST= Dialog.getRadioButton();//manually neuron channel set only for 1 st time
+}
+
 usingLUT = "PsychedelicRainBow2"; //Dialog.getRadioButton();//LUT, "PsychedelicRainBow2" is for Color MIP mask search, "royal" is for better looiking
 DSLTver = Dialog.getRadioButton();//background thresholding
 startMIP=Dialog.getNumber();//MIP starting slice
 endMIP=Dialog.getNumber();//MIP ending slice
 
-//blockposition=Dialog.getNumber();
-//totalblock=Dialog.getNumber();
-
+if(JaneliaVersion==1){
+	blockposition=Dialog.getNumber();
+	totalblock=Dialog.getNumber();
+}
 blockON=false;
 
 lowthreM="Peak Histogram";
-
 savestring="Choose directory";
 
 
@@ -238,10 +261,12 @@ if(subfolder==1){
 
 if(AutoBRV==1){
 	Dialog.create("Desired average value for Auto-Brightness");
-	Dialog.addNumber("Desired average value for the Auto-Brightness adjustment /255  120-200", desiredmean);
-	Dialog.addNumber("the background thresholding strength 0-0.3", lowerweight);
-	Dialog.addNumber("If the signal is too dim, use this average brightness 230-245.", secondjump);
+	Dialog.addNumber("Desired average value for the Auto-Brightness adjustment /255  150-220", desiredmean);
 	
+	if(JaneliaVersion==1){
+		Dialog.addNumber("the background thresholding strength 0-0.5", lowerweight);
+		Dialog.addNumber("If the signal is too dim, use this average brightness 230-245.", secondjump);
+	}
 	if(CropYN){
 		item10=newArray("Gen1_Gal4", "MCFO_MIP");
 		Dialog.addRadioButtonGroup("Line Type for OpticLobe cropping", item10, 2, 2, MIPtype); 
@@ -249,8 +274,10 @@ if(AutoBRV==1){
 	
 	Dialog.show();
 	desiredmean=Dialog.getNumber();
-	lowerweight=Dialog.getNumber();
-	secondjump=Dialog.getNumber();
+	if(JaneliaVersion==1){
+		lowerweight=Dialog.getNumber();
+		secondjump=Dialog.getNumber();
+	}
 	
 	if(CropYN)
 	MIPtype=Dialog.getRadioButton();
@@ -319,23 +346,33 @@ for (i=startn; i<endn; i++){
 	
 	if(i==startn){
 		
-		FilePathArray=newArray(JFRCpath, "JFRC2010_Mask.tif","DontOpen");
+		FilePathArray=newArray(JFRCpath, "JFRC2010_Mask.tif","DontOpen",tempMaskDir);//DontOpen
 		fileOpen(FilePathArray);
 		JFRCpath=FilePathArray[0];
+		tempMaskDir=FilePathArray[3];
 		print("JFRCpath; "+JFRCpath);
 		
 		
-		FilePathArray=newArray(VncMaskpath, "Mask_VNC_Female.tif","DontOpen");
+		FilePathArray=newArray(VncMaskpath, "Mask_VNC_Female.tif","DontOpen",tempMaskDir);
 		fileOpen(FilePathArray);
 		VncMaskpath=FilePathArray[0];
 		print("VncMaskpath; "+VncMaskpath);
 		
-		FilePathArray=newArray(JFRC3Dpath, "JFRC2010_3D_Mask.nrrd","DontOpen");
+		//	setBatchMode(false);
+		//		updateDisplay();
+		//		a
+		
+		TDext=File.exists(tempMaskDir+"JFRC2010_3D_Mask.nrrd");
+		if(TDext==1)
+		JFRC3Dpath=tempMaskDir;
+		
+		FilePathArray=newArray(JFRC3Dpath, "JFRC2010_3D_Mask.nrrd","DontOpen",tempMaskDir);
 		fileOpen(FilePathArray);
 		JFRC3Dpath=FilePathArray[0];
+		tempMaskDir=FilePathArray[3];
 		print("JFRC3Dpath; "+JFRC3Dpath);
 		
-		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpath+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication, filepath);
+		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpath+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir, filepath);
 	}
 	
 	countFile=countFile+1;
@@ -366,6 +403,9 @@ for (i=startn; i<endn; i++){
 	progress=i/endn;
 	showProgress(progress);
 	path = dir+list[i];
+	
+	if(UseSubfolderName!=false && UseSubfolderName!=true)
+	UseSubfolderName=false;
 	
 	mipbatch=newArray(list[i], path, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
 	//	mipbatch[0]=list[i]; mipbatch[1]=path; mipbatch[2]=UseSubfolderName; mipbatch[3]=dirCOLOR; mipbatch[4]=endn; 
@@ -406,7 +446,7 @@ for (i=startn; i<endn; i++){
 									
 									for (iiiii=0; iiiii<listsub4.length; iiiii++){
 										path5 = path4+listsub4[iiiii];
-										mipbatch=newArray(nc82nrrd,listsub4[iiiii], path5, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime,firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi], AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+										mipbatch=newArray(listsub4[iiiii], path5, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime,firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi], AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
 										mipfunction(mipbatch);
 										firsttime=mipbatch[8];
 										firsttime1ch=mipbatch[9];
@@ -604,7 +644,9 @@ function mipfunction(nc82nrrd,mipbatch) {
 	dotIndexV3 = lastIndexOf(listP, "c0.v3dpbd");
 	dotIndexV3raw = lastIndexOf(listP, "v3draw");
 	dotIndexLSM = lastIndexOf(listP, "lsm");
-	
+	dotIndexoib = lastIndexOf(listP, "oib");
+	if(dotIndexoib==-1)
+	dotIndexoib= lastIndexOf(listP, "oif");
 	
 	//dotIndexJBA = lastIndexOf(listP, "02.nrrd");//02 channel JaneliaWorkstation downloaded nrrd
 	//if(dotIndexJBA==-1)
@@ -688,15 +730,24 @@ function mipfunction(nc82nrrd,mipbatch) {
 	if(filepathcolor==1){
 		if(printskip==1)
 		print("Skipped; "+i+"; 	 "+listP);
-	}else if(dotIndexVNC==-1 && dotIndextif==-1 && dotIndexzip== -1 && dotIndexTIFF==-1 && dotIndex==-1 && dotIndexAM==-1 && dotIndexLSM==-1 && dotIndexMha==-1 && dotIndexV3==-1 && dotIndexV3raw==-1 && dotIndexJBA==-1 && dotIndexCMTK==-1){
+	}else if(dotIndexoib==-1 && dotIndexVNC==-1 && dotIndextif==-1 && dotIndexzip== -1 && dotIndexTIFF==-1 && dotIndex==-1 && dotIndexAM==-1 && dotIndexLSM==-1 && dotIndexMha==-1 && dotIndexV3==-1 && dotIndexV3raw==-1 && dotIndexJBA==-1 && dotIndexCMTK==-1){
 		
 		if(printskip==1)
 		print("Skipped; "+i+"; 	 "+listP);
 	}else{
 		
-		//	if(dotIndexAM>-1 || dotIndex>-1 && compCC==1){// if not compressed
-		//		run("Bio-Formats Importer", "open="+path+" autoscale color_mode=Default view=[Standard ImageJ] stack_order=Default");
-		//	}
+		if(dotIndexoib>-1){// if not compressed
+			previousPath=path;
+			
+			newpath = replace(path, " ", "_");
+			File.rename(previousPath, newpath); // - Renames, or moves, a file or directory. Returns "1" (true) if successful. 
+			path = newpath;
+			
+			run("Bio-Formats Importer", "open="+path+" autoscale color_mode=Default view=[Standard ImageJ] stack_order=Default");
+			getDimensions(width, height, channels, slices, frames);
+			run("Stack to Hyperstack...", "order=xyczt(default) channels="+channels+" slices="+slices+" frames=1 display=Color");
+		}
+		
 		if(dotIndexJBA>-1 || dotIndexCMTK>-1 || dotIndextif>-1 || dotIndexTIFF>-1 || dotIndexLSM>-1 || dotIndexMha>-1 || dotIndexzip>-1 || dotIndexVNC>-1 || dotIndexV3raw>-1 || dotIndexV3>-1 || dotIndex>-1){
 			//	filesize=File.length(path);
 			//	if(filesize>10000000){// if more than 60MB
@@ -715,6 +766,9 @@ function mipfunction(nc82nrrd,mipbatch) {
 			//		print("file size is too small, "+filesize/10000000+" MB, less than 60MB.  "+listP+"	 ;	 "+i+" / "+endn);
 			//	print(listP+"	 ;	 "+i+" / "+endn+"  too small");
 			//	}
+			
+			dotIndex= lastIndexOf(listP,".");
+			origiMIP= substring(listP, 0, dotIndex);
 		}
 		
 		
@@ -726,7 +780,6 @@ function mipfunction(nc82nrrd,mipbatch) {
 			getDimensions(width, height, channels, slices, frames);
 			getVoxelSize(VxWidth, VxHeight, VxDepth, VxUnit);
 			
-			//		run("Close", "Exception");
 			
 			if(KeiNrrdShrink==1){
 				run("Size...", "width=802 height=601 constrain average interpolation=Bicubic");
@@ -735,56 +788,15 @@ function mipfunction(nc82nrrd,mipbatch) {
 			}
 			
 			
-			
 			if(channels>10){
 				run("Properties...", "channels=1 slices="+channels+" frames=1 unit=microns pixel_width="+VxWidth+" pixel_height="+VxHeight+" voxel_depth="+VxDepth+"");
 				
 				getDimensions(width, height, channels, slices, frames);	
 			}
-			run("Properties...", "channels=1 slices="+slices+" frames=1 unit=microns pixel_width="+VxWidth+" pixel_height="+VxHeight+" voxel_depth="+VxDepth+"");
 			
-			if(bitd==32 || unsharp=="Max"){
-				setMinAndMax(0, 1);
-				run("8-bit");
-				bitd=8;
-				unsharp="Max";//"NA", "Unsharp", "Max"
-			}
-			
-			MedianSub=lowerweight;
-			print("Channel number; "+channels);
-			if(bitd==8){
-				print("8bit file");
-				desiredmean=200;
-				lowerweight=30;
-				secondjump=245;
-				MedianSub=0;
-				
-				run("Z Project...", "projection=[Max Intensity]");
-				run("Enhance Contrast", "saturated=0.4");
-				getMinAndMax(min, max);
-				close();
-				
-				if(min!=0 && max!=255){
-					selectWindow(origi);
-					setMinAndMax(min, max);
-					run("Apply LUT", "stack");
-				}
-			}
-			
-			if(bitd==16){
-				run("Z Project...", "projection=[Max Intensity]");
-				
-				getMinAndMax(min, max);
-				if(max<=255){// 8 bit file in 16bit format
-					desiredmean=205;
-					lowerweight=0;// mip function subtraction
-					
-					MedianSub=100;
-					print("desiremean 205  16bit file with 8bit data");
-				}
-				close();
-			}
 			QIvalue="";
+			
+			print("UseSubfolderName; "+UseSubfolderName);
 			if(UseSubfolderName==false){
 				dotIndex = lastIndexOf(origi, ".");
 				if (dotIndex!=-1);
@@ -814,7 +826,7 @@ function mipfunction(nc82nrrd,mipbatch) {
 							QIvalue=QIvalue+"_";
 						}	
 					}
-				}
+				}//if(QIindex!=-1){
 				
 			}else{
 				
@@ -1255,126 +1267,276 @@ function mipfunction(nc82nrrd,mipbatch) {
 				if(channels!=0){
 					
 					stackSt=getTitle();
+					selectWindow(stackSt);
+					stack=getImageID();
 					
-					//	setBatchMode(false);
-					//		updateDisplay();
+					
+					if(bitd==32 || unsharp=="Max"){
+						setMinAndMax(0, 1);
+						run("8-bit");
+						bitd=8;
+						unsharp="Max";//"NA", "Unsharp", "Max"
+						DefMaxValue=1;
+					}
+					
+					if(bitd==24)
+					Inimax=255;
+					
+					MedianSub=70;
+					print("Channel number; "+channels);
+					if(bitd==8){
+						print("8bit file");
+						desiredmean=200;
+						lowerweight=0.3;
+						secondjump=245;
+						MedianSub=0;
+						DefMaxValue=255;
+						
+						run("Z Project...", "projection=[Max Intensity]");
+						run("Enhance Contrast", "saturated=0.3");
+						getMinAndMax(min, Inimax);
+						close();
+						
+						if(min!=0 && Inimax!=255){
+							selectWindow(stackSt);
+							setMinAndMax(min, Inimax);
+							run("Apply LUT", "stack");
+						}
+						
+						run("Max value");
+						logsum=getInfo("log");
+						maxStartindex=lastIndexOf(logsum,"Maxvalue");
+						maxEndindex=lastIndexOf(logsum,"Minvalue");
+						maxvalue=substring(logsum, maxStartindex+10, maxEndindex-2);
+						maxvalue=round(maxvalue);
+						
+						print("3D stack brightness adjusted; maxvalue; "+maxvalue+"  Inimax; "+Inimax);
+						
+					}//if(bitd==8){
+					
+					if(bitd==16){
+						run("Z Project...", "projection=[Max Intensity]");
+						MIPtitle= getTitle();
+						
+						resetMinAndMax();
+						getMinAndMax(Inimin, max);
+						
+						if(max>255 && max<4096)
+						DefMaxValue=4095;
+						else if (max>4095)
+						DefMaxValue=65535;
+						else if (max<256)
+						DefMaxValue=255;
+						
+						if(max<=255){// 8 bit file in 16bit format
+							desiredmean=205;
+							lowerweight=0;// mip function subtraction
+							
+							MedianSub=100;
+							print("desiremean 205  16bit file with 8bit data");
+						}
+						
+						
+						run("Enhance Contrast", "saturated=0.3");
+						getMinAndMax(min, Inimax);
+						
+						RealInimax=Inimax;
+						
+						if(DefMaxValue==255){
+							Inimax=round(Inimax*6);
+							print("DefMaxValue = 255, 16 bit");
+						}
+						
+						if(DefMaxValue==4095){
+							if(Inimax<200 && Inimax>100)
+							Inimax=Inimax*3.5;
+							else if (Inimax>=200 && Inimax<300)
+							Inimax=round(Inimax*3);
+							else if (Inimax<100)
+							Inimax=Inimax*4;
+							else if (Inimax>=300 && Inimax<500)
+							Inimax=Inimax*2;
+						}
+						
+						if(DefMaxValue==65535){
+							if(Inimax<3200 && Inimax>1600)
+							Inimax=Inimax*3;
+							else if (Inimax>=3200 && Inimax<4800)
+							Inimax=round(Inimax*2.5);
+							else if (Inimax<1600)
+							Inimax=Inimax*4;
+							else if (Inimax>=4800 && Inimax<8000)
+							Inimax=Inimax*2;
+						}
+						
+						
+						selectWindow(MIPtitle);
+						setMinAndMax(0, Inimax);
+						run("Apply LUT");
+						
+						if(getHeight==1024 && getWidth==512){
+							FilePathArray=newArray(VncMaskpath, "Mask_VNC_Female.tif","Open",tempMaskDir);
+							fileOpen(FilePathArray);
+							
+							imageCalculator("Subtract", MIPtitle,"Mask_VNC_Female.tif");
+							
+							selectWindow("Mask_VNC_Female.tif");
+							close();
+							zerovalue=239907;
+							
+							selectWindow(MIPtitle);
+							total=0; // getHistogram is broke;
+							for(ix=0; ix<getWidth; ix++){
+								for(iy=0; iy<getHeight; iy++){
+									pxv = getPixel(ix,iy);
+									total= total+pxv;
+								}
+							}
+						}else{
+							
+							setMinAndMax(0, 65535);
+							selectWindow(MIPtitle);
+							
+							makeRectangle(getWidth*0.2, getHeight*0.2, getWidth*0.6, getHeight*0.6);
+							setForegroundColor(0, 0, 0);
+							run("Fill", "slice");
+							
+							total=0; // getHistogram is broke;
+							for(ix=0; ix<getWidth; ix++){
+								for(iy=0; iy<getHeight; iy++){
+									pxv = getPixel(ix,iy);
+									total= total+pxv;
+									
+									if(pxv==0)
+									zerovalue=zerovalue+1;
+								}
+							}//for(ix=0; ix<getWidth; ix++){
+						}
+						
+						//		zerovalue=counts[0];
+						Inimin=round((total/((getHeight*getWidth)-zerovalue))*0.8);//239907 is female VNC size
+						
+						print("Initial Bri adjustment; Inimin; "+Inimin+"   max; "+Inimax+"   RealInimax; "+RealInimax+"   DefMaxValue; "+DefMaxValue);
+						
+						selectWindow(MIPtitle);
+						close();
+						
+						if(Inimin!=0 || Inimax!=65535){
+							selectWindow(stackSt);
+							
+							setMinAndMax(0, Inimax);
+							run("Apply LUT", "stack");
+							
+							
+							//		setBatchMode(false);
+							//		updateDisplay();
+							//		a
+							
+							setMinAndMax(Inimin, 65535);
+							run("Apply LUT", "stack");
+							
+							run("Max value");
+							logsum=getInfo("log");
+							maxStartindex=lastIndexOf(logsum,"Maxvalue");
+							maxEndindex=lastIndexOf(logsum,"Minvalue");
+							maxvalue=substring(logsum, maxStartindex+10, maxEndindex-2);
+							maxvalue=round(maxvalue);
+							
+							print("3D stack brightness adjusted; maxvalue; "+maxvalue);
+						}else
+						maxvalue=65535;
+						
+					}//	if(bitd==16){
+					
+					
+					//			setBatchMode(false);
+					//			updateDisplay();
 					//			a
+					
 					if(unsharp!="Max"){
 						if(lowerweight>0){
 							if(getHeight==512 && getWidth==1024){
-								
-								run("Z Project...", "projection=[Max Intensity]");
-								MedianSub=lowerweight;
-								getMinAndMax(min, max);
-								if(max<=255){// 8 bit file in 16bit format
-									desiredmean=200;
-									lowerweight=0;
+								if(MedianSub!=0){
 									
-									MedianSub=100;
-									print("16bit file with 8bit data");
-								}
-								close();
-								
-								
-								if(isOpen("JFRC2010_3D_Mask.nrrd")==0);
-								open(JFRC3Dpath);
-								
-								if(bitd==16 && max>255){
-									histave=50;
-								}else
-								histave=1;
-								
-								
-								run("Mask Median Subtraction", "mask=JFRC2010_3D_Mask.nrrd data="+stackSt+" %="+MedianSub+" subtract histogram="+histave+"");
-								selectWindow("JFRC2010_3D_Mask.nrrd");
-								close;
+									run("Z Project...", "projection=[Max Intensity]");
+									MedianSub=70;
+									getMinAndMax(min, max);
+									if(max<=255){// 8 bit file in 16bit format
+										desiredmean=200;
+										lowerweight=0;
+										
+										MedianSub=100;
+										print("16bit file with 8bit data");
+									}
+									close();
+									
+									
+									if(isOpen("JFRC2010_3D_Mask.nrrd")==0);
+									open(JFRC3Dpath);
+									
+									if(bitd==16 && max>255){
+										histave=50;
+										MedianSub=60;
+									}else
+									histave=1;
+									
+									
+									run("Mask Median Subtraction", "mask=JFRC2010_3D_Mask.nrrd data="+stackSt+" %="+MedianSub+" subtract histogram="+histave+"");
+									selectWindow("JFRC2010_3D_Mask.nrrd");
+									close;
+								}//	if(MedianSub!=0){	
 							}else{
 								OrigiSlice=nSlices();
-								
-								if(lowerweight>0){
-									run("Z Project...", "start=10 stop="+OrigiSlice-10+" projection=[Max Intensity]");
-									rename("MIP_mask.tif");
-									setAutoThreshold("Mean dark");
-									setOption("BlackBackground", true);
-									run("Convert to Mask");
-									
-									//		setBatchMode(false);
-									//		updateDisplay();
-									//		a
-									
-									run("Select All");
-									run("Copy");
-									
-									if(bitd==16)
-									histave=50;
-									else
-									histave=5;
-									
-									for(islicen=2; islicen<=OrigiSlice; islicen++){
-										run("Add Slice");
-										run("Paste");
-										//		print("slice added "+islicen);
+								if(MedianSub!=0){
+									if(lowerweight>0){
+										run("Z Project...", "start=10 stop="+OrigiSlice-10+" projection=[Max Intensity]");
+										rename("MIP_mask.tif");
+										setAutoThreshold("Mean dark");
+										setOption("BlackBackground", true);
+										run("Convert to Mask");
+										
+										//		setBatchMode(false);
+										//		updateDisplay();
+										//		a
+										
+										run("Select All");
+										run("Copy");
+										
+										if(bitd==16)
+										histave=50;
+										else
+										histave=5;
+										
+										for(islicen=2; islicen<=OrigiSlice; islicen++){
+											run("Add Slice");
+											run("Paste");
+											//		print("slice added "+islicen);
+										}
+										
+										//			setBatchMode(false);
+										//					updateDisplay();
+										//					a
+										
+										print("1278 lowerweight*0.3; "+lowerweight*0.3);
+										run("Mask Median Subtraction", "mask=MIP_mask.tif data="+stackSt+" %="+lowerweight*30+" subtract histogram="+histave+"");
+										
+										//					setBatchMode(false);
+										//										updateDisplay();
+										//										a
+										
+										selectWindow("MIP_mask.tif");
+										close;
 									}
-									
-									//			setBatchMode(false);
-									//					updateDisplay();
-									//					a
-									
-									print("1278 lowerweight; "+lowerweight);
-									run("Mask Median Subtraction", "mask=MIP_mask.tif data="+stackSt+" %="+lowerweight*100+" subtract histogram="+histave+"");
-									
-									//					setBatchMode(false);
-									//										updateDisplay();
-									//										a
-									
-									selectWindow("MIP_mask.tif");
-									close;
 								}
 							}
-						}
-					}
+						}//	if(lowerweight>0){
+					}//if(unsharp!="Max"){
 					
-					selectWindow(stackSt);
-					stack=getImageID();
+					
 					//					setBatchMode(false);
 					//					updateDisplay();
 					//					a
-				}
-				
-				//	setBatchMode(false);
-				//		updateDisplay();
-				//		a
-				
-				run("Max value");
-				logsum=getInfo("log");
-				maxStartindex=lastIndexOf(logsum,"Maxvalue");
-				maxEndindex=lastIndexOf(logsum,"Minvalue");
-				maxvalue=substring(logsum, maxStartindex+10, maxEndindex-2);
-				maxvalue=round(maxvalue);
-				
-				minvalue=substring(logsum, maxEndindex+10, lengthOf(logsum));
-				minvalue=round(minvalue);
-				
-				print("Detected Min; "+minvalue+"   Detected Max; "+maxvalue);
-				
-				//		setBatchMode(false);
-				//		updateDisplay();
-				//		a
-				
-				setMinAndMax(minvalue, maxvalue);
-				if(bitd==8){
-					if(minvalue!=0 || maxvalue!=255 )
-					run("Apply LUT", "stack");
-				}else if(bitd==16){
-					if(minvalue!=0 || maxvalue!=4095)
-					run("Apply LUT", "stack");
-					
-					run("A4095 normalizer", "subtraction=0 max=65535 start=1 end="+nSlices+"");
-				}
-				
-				//	setBatchMode(false);
-				//					updateDisplay();
-				//					a
+				}//if(channels!=0){
 				
 				
 				BasicMIP=newArray(bitd,0,stack,GradientDim,stackSt);
@@ -1382,7 +1544,8 @@ function mipfunction(nc82nrrd,mipbatch) {
 				
 				
 				MIP=getImageID();
-				DefMaxValue=BasicMIP[1];//actual max value in stack
+				run("Canvas Size...", "width="+round(getWidth()*0.95)+" height="+round(getHeight()*0.95)+" position=Center zero");
+				//	DefMaxValue=BasicMIP[1];//actual max value in stack
 				sigsize=0;
 				
 				print("basicoperation done");
@@ -1393,13 +1556,13 @@ function mipfunction(nc82nrrd,mipbatch) {
 				
 				if(AutoBRV==1){//to get brightness value from MIP
 					selectImage(MIP);
-					briadj=newArray(desiredmean, 0, 0, 0,lowerweight,lowthreM,autothre,DefMaxValue,MIP,stack,multiDSLT,secondjump);
-					autobradjustment(briadj,DSLTver);
+					briadj=newArray(desiredmean, 0, 0, 0,lowerweight,lowthreM,autothre,maxvalue,MIP,stack,multiDSLT,secondjump);
+					autobradjustment(briadj,DSLTver,DefMaxValue);
 					applyV=briadj[2];
 					sigsize=briadj[1];
 					sigsizethre=briadj[3];
-					sigsizethre=round(sigsizethre);
-					sigsize=round(sigsize);
+					sigsizethre=parseFloat(sigsizethre);
+					sigsize=parseFloat(sigsize);
 					
 					if(isOpen("test.tif")){
 						selectWindow("test.tif");
@@ -1421,102 +1584,136 @@ function mipfunction(nc82nrrd,mipbatch) {
 					else if(unsharp=="Max")
 					run("Maximum...", "radius=1.5 stack");
 					
-					if(AutoBRV==1)
-					brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump);
-					
-					if(reverse0==1)
-					run("Reverse");
-					
-					if(usingLUT=="royal")
-					stackconcatinate();
-					
-					if(AutoBRV==0){
-						applyV=255;
-						if(bitd==16){
-							setMinAndMax(0, DefMaxValue);
-							run("8-bit");
-						}
+					if(bitd==16){
+						if(DefMaxValue==4095)
+						RealapplyV= round((applyV/16)*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
+						else if (DefMaxValue==255)
+						RealapplyV=((applyV/(16*16))*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
+						else if (DefMaxValue==65535)
+						RealapplyV= round(applyV*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
 					}
-					
-					ColorDepthCreator(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand);
-					
-					if(AutoBRV==1){
-						if(sigsize>9)
-						DSLTst="_DSLT";
-						else if(sigsize<10)
-						DSLTst="_DSLT0";
-						
-						if(sigsizethre>9)
-						threST="_thre";
-						else if (sigsizethre<10)
-						threST="_thre0";
-						
-						if(bitd==8){
-							if(applyV<100)
-							applyVST="_0";
-							else
-							applyVST="_";
-						}else if(bitd==16){
-							if(applyV<1000)
-							applyVST="_0";
-							else if (applyV>999)
-							applyVST="_";
-							else if(applyV<100)
-							applyVST="_00";
-						}
-					}
-					
-					if(CropYN)
-					CropOP(MIPtype,applyV,colorscale);
-					
-					
-					
-					
-					if(imageNum==1){
-						if(AutoBRV==1)
-						save(myDir2Co+origiMIP+QIvalue+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
-						else
-						save(myDir2Co+origiMIP+".tif");
-					}else{
-						if(AutoBRV==1)
-						save(myDir2Co+origiMIP+"_CH"+MIPtry+QIvalue+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
-						else
-						save(myDir2Co+origiMIP+".tif");
-						
-						print("AutoBRV; "+AutoBRV+"   MIP saved; "+myDir2Co+origiMIP+"_CH"+MIPtry+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
-					}
-					
-					close();
-					
-					if(isOpen("MIP.tif")){
-						selectWindow("MIP.tif");
-						close();
-					}
-					//	if(channels==1)
-					//	selectWindow("Original_Stack.tif");
-					
-					//	if(channels==2 || channels==3 || channels==4)
-					selectWindow("Original_Stack.tif");
-					close();
-					
-					if(channels==4){
-						OpenImage=nImages(); OpenTitlelist=getList("image.titles");
-						for(iImage=0; iImage<OpenImage; iImage++){
-							//		print("OpenImage; "+OpenTitlelist[iImage]);
-							DontClose=0;
-							for(sameornot=0; sameornot<titlelist.length; sameornot++){
-								
-								if(OpenTitlelist[iImage]==titlelist[sameornot])
-								DontClose=1;
-							}
-							if(DontClose==0){
-								selectWindow(OpenTitlelist[iImage]);
-								close();
-							}
-						}
-					}//if(channels>1){
 				}//if(colorcoding==1){
 				
+				if(bitd==8 || bitd==24)
+				RealapplyV= round(applyV*(Inimax/255));
+				
+				print("After +Inimax RealapplyV; "+RealapplyV+"   applyV; "+applyV);
+				
+				
+				
+				if(sigsize<30){
+					if(AutoBRV==1){
+						brightnessapplyArray = newArray(applyV,RealapplyV,sigsize,sigsizethre);
+						brightnessapply(DefMaxValue,filepath,brightnessapplyArray, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump,Inimax);
+						
+						applyV=brightnessapplyArray[0];
+						RealapplyV=brightnessapplyArray[1];
+					}
+				}else{
+					setMinAndMax(0, 65535);
+					run("8-bit");
+				}//if(sigsize<30){
+				if(reverse0==1){
+					run("Reverse");
+					run("Flip Horizontally", "stack");
+				}
+				
+				if(usingLUT=="royal")
+				stackconcatinate();
+				
+				if(AutoBRV==0){
+					applyV=255;
+					if(bitd==16){
+						setMinAndMax(0, DefMaxValue);
+						run("8-bit");
+					}
+				}//if(AutoBRV==0){
+				applyV = round(RealapplyV);
+				print("Line 1518 RealapplyV; "+round(RealapplyV));
+				
+				ColorCoder(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand);
+				
+				if(AutoBRV==1){
+					if(sigsize>9)
+					DSLTst="_DSLT";
+					else if(sigsize<10)
+					DSLTst="_DSLT0";
+					
+					if(sigsizethre>9)
+					threST="_thre";
+					else if (sigsizethre<10)
+					threST="_thre0";
+					
+					if(bitd==8){
+						if(applyV<100)
+						applyVST="_0";
+						else
+						applyVST="_";
+					}else if(bitd==16){
+						if(applyV<1000)
+						applyVST="_0";
+						else if (applyV>999)
+						applyVST="_";
+						else if(applyV<100)
+						applyVST="_00";
+					}
+				}//if(AutoBRV==1){
+				
+				if(CropYN)
+				CropOP(MIPtype,applyV,colorscale);
+				
+				
+				TrueMaxValue=0;
+				if(DefMaxValue<4096){
+					
+					TrueMaxValue=4095;
+					if(DefMaxValue<256)
+					TrueMaxValue=255;
+					
+				}else if(DefMaxValue>4095)
+				TrueMaxValue=65535;
+				
+				if(imageNum==1){
+					if(AutoBRV==1)
+					save(myDir2Co+origiMIP+QIvalue+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
+					else
+					save(myDir2Co+origiMIP+".tif");
+					
+				}else{
+					if(AutoBRV==1)
+					save(myDir2Co+origiMIP+"_CH"+MIPtry+QIvalue+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
+					else
+					save(myDir2Co+origiMIP+".tif");
+					
+					print("AutoBRV; "+AutoBRV+"   MIP saved; "+myDir2Co+origiMIP+"_CH"+MIPtry+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
+				}
+				
+				close();
+				
+				if(isOpen("MIP.tif")){
+					selectWindow("MIP.tif");
+					close();
+				}
+				
+				selectWindow("Original_Stack.tif");
+				close();
+				
+				if(channels==4){
+					OpenImage=nImages(); OpenTitlelist=getList("image.titles");
+					for(iImage=0; iImage<OpenImage; iImage++){
+						//		print("OpenImage; "+OpenTitlelist[iImage]);
+						DontClose=0;
+						for(sameornot=0; sameornot<titlelist.length; sameornot++){
+							
+							if(OpenTitlelist[iImage]==titlelist[sameornot])
+							DontClose=1;
+						}
+						if(DontClose==0){
+							selectWindow(OpenTitlelist[iImage]);
+							close();
+						}
+					}
+				}//if(channels>1){
 			}//	for(MIPtry=1; MIPtry<=imageNum; MIPtry++){
 			run("Close All");
 			wait(100);
@@ -1543,13 +1740,13 @@ function mipfunction(nc82nrrd,mipbatch) {
 	}//if(dotIndextif==-1 && dotI
 } //function mipfunction(mipbatch) { 
 ///////////////////////////////////////////////////////////////
-function autobradjustment(briadj,DSLTver){
+function autobradjustment(briadj,DSLTver,DefMaxValue){
 	DOUBLEdslt=1;
 	desiredmean=briadj[0];
 	lowerweight=briadj[4];
 	lowthreM=briadj[5];
 	autothre=briadj[6];
-	DefMaxValue=briadj[7];
+	maxvalue=briadj[7];//65535
 	MIP=briadj[8];
 	stack=briadj[9];
 	multiDSLT=briadj[10];
@@ -1569,7 +1766,7 @@ function autobradjustment(briadj,DSLTver){
 	}
 	
 	if(bitd==16){
-		setMinAndMax(0, DefMaxValue);
+		setMinAndMax(0, maxvalue);
 		run("Copy");
 	}
 	/////////////////////signal size measurement/////////////////////
@@ -1577,7 +1774,7 @@ function autobradjustment(briadj,DSLTver){
 	run("Duplicate...", "title=test2.tif");
 	setAutoThreshold("Triangle dark");
 	getThreshold(lower, upper);
-	setThreshold(lower, DefMaxValue);//is this only for 8bit??
+	setThreshold(lower, maxvalue);//is this only for 8bit??
 	
 	run("Convert to Mask", "method=Triangle background=Dark black");
 	
@@ -1601,11 +1798,10 @@ function autobradjustment(briadj,DSLTver){
 	if(areathre/totalpix>0.4){
 		
 		selectImage(MIP);
-		
 		run("Duplicate...", "title=test2.tif");
 		setAutoThreshold("Moments dark");
 		getThreshold(lower, upper);
-		setThreshold(lower, DefMaxValue);
+		setThreshold(lower, maxvalue);
 		
 		run("Convert to Mask", "method=Moments background=Dark black");
 		
@@ -1638,34 +1834,12 @@ function autobradjustment(briadj,DSLTver){
 	//////////////////////
 	
 	selectImage(MIP);//MIP
+	resetMinAndMax();
 	getMinAndMax(min1, max);
-	if(max>4095){//16bit
-		minus=0;
-		getMinAndMax(min, max1);
-		while(max<65530){
-			minus=minus+100;
-			selectImage(MIP);//MIP
-			run("Duplicate...", "title=MIPDUP.tif");
-			
-			
-			//		print("premax; "+max+"premin; "+min);
-			run("Histgram stretch", "lower=0 higher="+max1-minus+"");//histogram stretch	\
-			getMinAndMax(min, max);
-			//		print("postmax; "+max+"postmin; "+min);
-			close();
-		}
-		
-		//		print("minus; "+minus);
-		
-		selectImage(MIP);//MIP
-		run("Histgram stretch", "lower="+min1+" higher="+max1-minus-100+"");//histogram stretch	\
-		getMinAndMax(min, max);
-		//		print("after max; "+max);
-		
-		selectImage(stack);
-		run("Histgram stretch", "lower="+min1+" higher="+max1-minus-100+" 3d");//histogram stretch	
-		selectImage(MIP);//MIP
-	}//if(max>4095){//16bit
+	
+	//setBatchMode(false);
+	//					updateDisplay();
+	//					a
 	
 	run("Mask Brightness Measure", "mask=test.tif data=MIP.tif desired="+desiredmean+"");
 	selectImage(MIP);//MIP
@@ -1677,6 +1851,7 @@ function autobradjustment(briadj,DSLTver){
 	applyV=applyvv[0];
 	
 	selectImage(MIP);//MIP
+	
 	
 	
 	if(fff=="MIP.tif"){
@@ -1706,12 +1881,20 @@ function autobradjustment(briadj,DSLTver){
 		setMinAndMax(0, applyV);
 		run("Apply LUT");
 		maxcounts=0; maxi=0;
-		getHistogram(values, counts,  256);
+		
+		histoArray = newArray(256);
+		for(ix=0; ix<getWidth; ix++){
+			for(iy=0; iy<getHeight; iy++){
+				pxv = getPixel(ix,iy);
+				histoArray[pxv]=histoArray[pxv]+1;
+			}
+		}
+		//getHistogram(values, counts,  256); broken function
 		for(i=0; i<100; i++){
-			Val=counts[i];
+			Val=histoArray[i];
 			
 			if(Val>maxcounts){
-				maxcounts=counts[i];
+				maxcounts=histoArray[i];
 				maxi=i;
 			}
 		}
@@ -1726,6 +1909,10 @@ function autobradjustment(briadj,DSLTver){
 		selectImage(MIP);
 		setMinAndMax(0, applyV);
 		run("Apply LUT");
+		
+		//	setBatchMode(false);
+		//						updateDisplay();
+		//						a
 		
 		setMinAndMax(changelower, 255);
 		run("Apply LUT");
@@ -1762,10 +1949,8 @@ function autobradjustment(briadj,DSLTver){
 		rename("MIP.tif");//MIP
 		close();
 		
-		
 		selectWindow("test.tif");//new window from DSLT
 		close();
-		
 	}//	if(applyV>50 && applyV<150 && bitd==8){
 	
 	while(isOpen("test.tif")){
@@ -1779,7 +1964,7 @@ function autobradjustment(briadj,DSLTver){
 	
 	sigsizethre=areathre/totalpix;
 	
-	print("Signal brightness; 	"+applyV+"	 Signal Size DSLT; 	"+sigsize+"	 Sig size threshold; 	"+sigsizethre);
+	print("Signal brightness; after 65535 applyV;	"+applyV+"	 Signal Size DSLT; 	"+sigsize+"	 Sig size threshold; 	"+sigsizethre);
 	briadj[1]=(sigsize)*100;
 	briadj[2]=applyV;
 	briadj[3]=sigsizethre*100;
@@ -1796,48 +1981,57 @@ function DSLTfun(dsltarray){
 	
 	if(autothre==0){//DSLT
 		
-		run("Anisotropic Diffusion 2D", "number=6 smoothings=7 keep=20 a1=0.50 a2=0.90 dt=20 edge=2 threads=1");
+		//	updateDisplay();
+		//	setBatchMode(false);
+		//	a
 		
+		run("Anisotropic Diffusion 2D", "number=6 smoothings=7 keep=20 a1=0.50 a2=0.90 dt=20 edge=2");// threads=1
+		print("Anisotropic diffusion ON");
 		//		updateDisplay();
 		//		setBatchMode(false);
 		//		a
 		
 		if(bitd==8){
 			if(DSLTver=="Line")
-			run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=1.5 filter=MEAN close=None noise=5px");
+			run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=3 radius_r_step=3 rotation=8 weight=5 filter=MEAN close=None noise=5px parallel=3");
 			else
-			run("DSLT ", "radius_r_max=15 radius_r_min=1 radius_r_step=4 rotation=8 weight=3 filter=MEAN close=None noise=7px");
+			run("DSLT ", "radius_r_max=15 radius_r_min=1 radius_r_step=4 rotation=8 weight=5 filter=MEAN close=None noise=7px");
 		}
 		if(bitd==16){
 			
 			//		updateDisplay();
 			//		setBatchMode(false);
 			//		a
+			resetMinAndMax();
 			getMinAndMax(min,max);
-			if(max!=65536){
-				setMinAndMax(min, max);
-				run("Apply LUT");
-				max=65535;
-			}
+			
 			run("A4095 normalizer", "subtraction=0 max="+max+" start=1 end=1");
+			print("A4095 normalizer max; "+max);
 			
-			//		updateDisplay();
-			//		setBatchMode(false);
-			//		a
+			//			updateDisplay();
+			//			setBatchMode(false);
+			//			a
+			
 			if(DSLTver=="Line")
-			run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=60 filter=MEAN close=None noise=5px");
+			run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=140 filter=GAUSSIAN close=None noise=5px parallel=3");
 			else
-			run("DSLT ", "radius_r_max=15 radius_r_min=1 radius_r_step=4 rotation=8 weight=60 filter=MEAN close=None noise=5px");
+			run("DSLT ", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=140 filter=MEAN close=None noise=5px");
 			
+			FirstDSLT=getTitle();
+			run("Remove Outliers...", "radius=1 threshold=90 which=Dark");
+			
+			run("DSLT ", "radius_r_max=5 radius_r_min=1 radius_r_step=2 rotation=8 weight=1 filter=GAUSSIAN close=None less=9");
+			
+			SecondDSLT=getTitle();
+			
+			selectWindow(FirstDSLT);
+			close();
+			
+			selectWindow(SecondDSLT);
+			run("Remove Outliers...", "radius=1 threshold=90 which=Dark");
 			run("16-bit");
 			run("Mask255 to 4095");
-			
-			//		updateDisplay();
-			//				setBatchMode(false);
-			//				a
 		}
-		
-		
 		
 		rename("test.tif");//new window from DSLT
 	}//if(autothre==0){//DSLT
@@ -1854,6 +2048,8 @@ function DSLTfun(dsltarray){
 	
 	if(bitd==16)
 	run("8-bit");
+	
+	run("Canvas Size...", "width="+round(getWidth()*0.95)+" height="+round(getHeight()*0.95)+" position=Center zero");
 	
 	run("Create Selection");
 	getStatistics(area1, mean, min, max, std, histogram);
@@ -1885,7 +2081,7 @@ function DSLTfun(dsltarray){
 	//		a
 	
 	multiDSLT=0;
-	if(multiDSLT==1 || bitd==16){
+	if(multiDSLT==1){//|| bitd==16
 		if(presize<0.3){// set DSLT more sensitive, too dim images, less than 5%
 			selectWindow("test.tif");//new window from DSLT
 			close();
@@ -1896,16 +2092,14 @@ function DSLTfun(dsltarray){
 			}
 			
 			selectWindow("MIP.tif");//MIP
-			
-			run("Anisotropic Diffusion 2D", "number=6 smoothings=7 keep=20 a1=0.50 a2=0.90 dt=20 edge=2 threads=1");
-			
+			run("Anisotropic Diffusion 2D", "number=6 smoothings=7 keep=20 a1=0.50 a2=0.90 dt=20 edge=2");// threads=1
 			//				setBatchMode(false);
 			//	updateDisplay();
 			//		a
 			
 			if(bitd==8){
 				if(DSLTver=="Line")
-				run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=1 filter=MEAN close=None noise=5px");
+				run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=1 filter=MEAN close=None noise=5px parallel=3");
 				else
 				run("DSLT ", "radius_r_max=15 radius_r_min=1 radius_r_step=4 rotation=8 weight=2 filter=MEAN close=None noise=7px");
 			}
@@ -1916,10 +2110,13 @@ function DSLTfun(dsltarray){
 					run("Apply LUT");
 					max=65535;
 				}
+				
 				run("A4095 normalizer", "subtraction=0 max="+max+" start=1 end=1");
 				
+				print("A4095 2nd normalizer max; "+max);
+				
 				if(DSLTver=="Line")
-				run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=35 filter=MEAN close=None noise=5px");
+				run("DSLT3D LINE2 Multi", "radius_r_max=15 radius_r_min=2 radius_r_step=3 rotation=8 weight=35 filter=MEAN close=None noise=5px parallel=3");
 				else
 				run("DSLT ", "radius_r_max=15 radius_r_min=1 radius_r_step=4 rotation=8 weight=30 filter=MEAN close=None noise=5px");
 			}
@@ -1954,11 +2151,11 @@ function DSLTfun(dsltarray){
 					for(rep=1; rep<repeatnum+1; rep++){
 						oriss=oriss+oriss*0.11;
 					}
-					weight=oriss/3;
+					weight=oriss/5;
 					desiredmean=desiredmean+(desiredmean/4)*weight;
 					desiredmean=round(desiredmean);
 					
-					if(desiredmean>secondjump || desiredmean==NaN)
+					if(desiredmean>secondjump || isNaN(desiredmean))
 					desiredmean=secondjump;
 					
 					print("desiredmean; 	"+desiredmean+"	 sizediff; "+sizediff+"	 weight *25%;"+(desiredmean/4)*weight);
@@ -1983,7 +2180,6 @@ function DSLTfun(dsltarray){
 			}
 		}//if(area2/totalpix<0.01){
 	}//	if(multiDSLT==1){
-	
 	
 	dsltarray[3]=desiredmean;
 	dsltarray[4]=realArea;
@@ -2047,10 +2243,19 @@ function stackconcatinate(){
 	run("Reverse");
 }
 
-function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump){
+function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump,Inimax){
 	stacktoApply=getTitle();
 	
-	print("brightnessapply start, applyV; "+applyV);
+	applyV = brightnessapplyArray[0];
+	RealapplyV=brightnessapplyArray[1];
+	sigsize=brightnessapplyArray[2];
+	sigsizethre=brightnessapplyArray[3];	
+	
+	print("brightnessapply start, RealapplyV; "+RealapplyV+"   applyV; "+applyV+"  lowerweight; "+lowerweight+"   sigsize; "+sigsize+"  sigsizethre; "+sigsizethre);
+	
+	BackgroundMaskArray = newArray("","");
+	brightnessNeed=0;
+	changelower=0;
 	
 	if(bitd==8){
 		if(applyV<255){
@@ -2064,16 +2269,19 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				if(applyV!=255)
 				run("Apply LUT");
 				
-				if(getHeight==512 && getWidth==1024){
-					
-					tissue="Brain";
-					BackgroundMask (tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
-					
-				}else if (getHeight==1024 && getWidth==512){// VNC
-					
-					tissue="VNC";
-					BackgroundMask (tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
-					
+				if(getHeight==512 || getHeight==592){
+					if(getWidth==1024 || getWidth==1184){
+						tissue="Brain";
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
+						brightnessNeed=BackgroundMaskArray[0];
+					}
+				}else if (getHeight==1024 || getHeight==1100 ){// VNC
+					if(getWidth==512){
+						
+						tissue="VNC";
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
+						brightnessNeed=BackgroundMaskArray[0];
+					}
 				}else if(getHeight>getWidth){
 					
 					newImage("MaskMIP.tif", "8-bit black", getWidth, getHeight, 1);
@@ -2096,13 +2304,19 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				if(lowthreM=="Peak Histogram"){//lowthre measurement
 					maxcounts=0; maxi=0;
 					getHistogram(values, counts,  256);
-					for(i3=0; i3<200; i3++){
+					for(i3=1; i3<200; i3++){
 						
 						sumave=0;
-						for(peakave=i3; peakave<i3+5; peakave++){
-							Val=counts[peakave];
-							sumave=sumave+Val;
-						}
+						for(ix=0; ix<getWidth; ix++){
+							for(iy=0; iy<getHeight; iy++){
+								pxv = getPixel(ix,iy);
+								
+								if(pxv>=i3)
+								if(pxv<i3+5)
+								sumave= sumave+pxv;
+							}
+						}//for(ix=0; ix<getWidth; ix++){
+						
 						aveave=sumave/5;
 						
 						if(aveave>maxcounts){
@@ -2113,7 +2327,7 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 						}
 					}//for(i3=0; i3<200; i3++){
 					if(maxi!=2)
-					changelower=maxi*lowerweight;
+					changelower=maxi*0.6;//lowerweight
 					else
 					changelower=0;
 					
@@ -2121,7 +2335,7 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 					setAutoThreshold("Huang dark");
 					getThreshold(lower, upper);
 					resetThreshold();
-					changelower=lower*lowerweight;
+					changelower=lower*0.6;
 				}
 				
 				changelower=round(changelower);
@@ -2129,6 +2343,11 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				//		changelower=100;
 				
 				selectWindow(MIPapply);
+				
+				//	setBatchMode(false);
+				//	updateDisplay();
+				//	a
+				
 				close();
 				
 				selectWindow(stacktoApply);
@@ -2137,7 +2356,7 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				if(applyV!=255)
 				run("Apply LUT", "stack");
 				
-				print("2073 ok  "+changelower);
+				print("2269 ok  "+changelower);
 				if(changelower>0){
 					changelower=round(changelower);
 					
@@ -2149,93 +2368,172 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				print("  lower threshold; 	"+changelower);
 			}
 		}
-	}
+	}//if(bitd==8){
+	
 	if(bitd==16){
 		
 		applyV2=applyV;
-		if(applyV==4095)
-		applyV2=4094;
+		if(applyV==65535)
+		applyV2=65534;
 		
 		selectImage(stack);
+		
 		run("Z Project...", "projection=[Max Intensity]");
 		MIP2=getImageID();
 		getMinAndMax(min, max);
+		setMinAndMax(min, max);
 		
-		minus=0;
-		while(max<65530){
-			minus=minus+50;
-			selectImage(MIP2);//MIP
-			run("Duplicate...", "title=MIPDUP.tif");
-			
-			//		print("premax; "+max+"premin; "+min);
-			run("Histgram stretch", "lower="+min+" higher="+applyV2-minus+"");//histogram stretch	
-			getMinAndMax(min, max);
-			//	print("postmax; "+max+"postmin; "+min);
-			close();
-		}
-		selectImage(MIP2);//MIP
-		close();
-		selectImage(stack);
-		stackSt=getTitle();
+		print("Line 1225 min; "+min+"   max; "+max);
 		
-		run("Histgram stretch", "lower=0 higher="+applyV2-minus+" 3d");//histogram stretch
+		if(min!=0 && max!=65535)
+		run("Apply LUT");
 		
-		selectImage(stack);
-		
-		run("Z Project...", "projection=[Max Intensity]");
+		run("Duplicate...", "title=MIPDUP.tif");
+		MIPDUPid = getImageID();
 		MIPthresholding=getTitle();
-		//	setBatchMode(false);
-		//	updateDisplay();
-		//	a
 		
-		print("2023 line OK");
+		print("Line 1252;  MIPthresholding; "+MIPthresholding);
+		//		setBatchMode(false);
+		//		updateDisplay();
+		///		a
 		
-		if(getHeight==512 && getWidth==1024){
-			tissue="Brain";
-			BackgroundMask (tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
-			
-		}else if (getHeight==1024 && getWidth==512){
-			tissue="VNC";
-			BackgroundMask (tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
-			
+		print("getHeight; "+getHeight);
+		
+		if(getHeight==512 || getHeight==592){
+			if(getWidth==1024 || getWidth==1184){
+				tissue="Brain";
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+				brightnessNeed= BackgroundMaskArray[0];
+			}
+		}else if (getHeight==1024 || getHeight==1100){
+			if(getWidth==512){
+				tissue="VNC";
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+				brightnessNeed= BackgroundMaskArray[0];
+			}
 		}else{//	if(getHeight==512 && getWidth==1024){
 			
+			tissue="UNKNOWN";
 			newImage("MaskMIP.tif", "16-bit", getWidth, getHeight, 1);
 			setForegroundColor(255, 255, 255);
-			makeRectangle(round(getWidth*(162/1499)), round(getHeight*(131/833)), round(getWidth*(1150/1499)), round(getHeight*(508/833)));
-			run("Make Inverse");
+			makeRectangle(round(getWidth*(150/1500)), round(getHeight*(100/833)), round(getWidth*(1200/1500)), round(getHeight*(600/833)));			//		run("Make Inverse");
 			run("Fill", "slice");
+			setMinAndMax(0, 255);
+			run("Apply LUT");
 			
+			run("Three D Ave");
+			MaskBri = getTitle();
+			MaskBri= parseFloat(MaskBri);//Chaneg string to number
+			MaskBri = round(MaskBri);
+			rename("MaskMIP.tif");
 			
+			selectImage(MIPDUPid);
+			rename(MIPthresholding);
+			
+			imageCalculator("Min", MIPthresholding,"MaskMIP.tif");
+			
+			GammaON=true;
+			//	setBatchMode(false);
+			if(GammaON==true){
+				
+				run("Gamma ", "gamma=1.40 in=InMacro cpu=6");
+				gamma = getTitle();
+				
+				selectWindow(MIPthresholding);
+				close();
+				
+				selectWindow(gamma);
+				rename(MIPthresholding);
+				MIPDUPid=getImageID();
+				print("GAMMA 1.4 applied to 2D");
+			}
+			
+			run("Three D Ave");
 			//		setBatchMode(false);
-			//			updateDisplay();
-			//			a
+			//		updateDisplay();
+			//		a
 			
-			imageCalculator("Max", MIPthresholding,"MaskMIP.tif");
+			//	run("Mask Brightness Measure", "mask=MaskMIP.tif data="+MIPthresholding+" desired=150");
+			
+			brightnessNeed = getTitle();
+			brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
+			brightnessNeed = round(brightnessNeed);
+			brightnessNeed= round(brightnessNeed*(65535/MaskBri));
+			
+			selectImage(MIPDUPid);
+			rename(MIPthresholding);
+			
+			print("brightnessNeed; "+brightnessNeed);
+			
+			
+			//			setBatchMode(false);
+			//				updateDisplay();
+			//				a
+			
 			
 			selectWindow("MaskMIP.tif");
 			close();
 			
 			selectWindow(MIPthresholding);
-			
+			MIPDUPid=getImageID();// masked image
 		}
 		
+		if(DefMaxValue==4095 && tissue=="VNC")
+		MinSigSize = 0;
+		else if (DefMaxValue==65535 && tissue=="VNC")
+		MinSigSize = 0;
+		else if (DefMaxValue==255 && tissue=="VNC")
+		MinSigSize = 0;
 		
-		print("2053 line OK");
+		if(tissue=="Brain" || tissue=="UNKNOWN"){
+			if(DefMaxValue==4095)
+			MinSigSize = 0;
+			else if (DefMaxValue==65535)
+			MinSigSize = 0;
+			else if (DefMaxValue==255)
+			MinSigSize = 0;
+		}
 		
+		print("MIPthresholding; "+MIPthresholding);
 		//// lower thresholding //////////////////////////////////	
-		maxi=0; 		countregion=50500;
+		maxi=0;			 		countregion=10000;
+		
 		if(lowthreM=="Peak Histogram"){
-			//	run("Gaussian Blur...", "sigma=2");
+			selectWindow(MIPthresholding);
+			MIPDUPid = getImageID();
+			
+			//	setBatchMode(false);
+			//					updateDisplay();
+			//					a
+			
 			maxcounts=0; medianNum=400; 
-			getHistogram(values, counts,  65530);
+			//	getHistogram(values, counts,  65536);
+			
+			counts=newArray(65536);
+			
+			for(ix=0; ix<getWidth; ix++){
+				for(iy=0; iy<getHeight; iy++){
+					pxv = getPixel(ix,iy);
+					
+					counts[pxv]=counts[pxv]+1;
+				}
+			}//for(ix=0; ix<getWidth; ix++){
+			
+			////Average value
+			
+			brightnessNeed=round(brightnessNeed);
+			
+			if(brightnessNeed>35000)
+			countregion=16000;
+			else
+			countregion=brightnessNeed;
 			
 			for(i3=5; i3<countregion-medianNum; i3++){
 				
 				sumVal20=0; 
 				
 				for(aveval=i3; aveval<i3+medianNum; aveval++){
-					Val20=counts[aveval];
+					Val20=counts[aveval]*aveval;
 					sumVal20=sumVal20+Val20;
 				}
 				AveVal20=sumVal20/medianNum;
@@ -2243,31 +2541,228 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 				if(AveVal20>maxcounts){
 					maxcounts=AveVal20;
 					maxi=i3+(medianNum/2);
+					Final_i3 = i3;
+					//	print("i3; "+i3);
 				}
 			}//		for(i3=5; i3<countregion-medianNum; i3++){
 			
+			maxiZero=0;
+			if(maxi==0){
+				maxi=brightnessNeed;
+				maxiZero=1;
+			}
 			
-			changelower = 0;
-			if (maxi>9000)
-			changelower=maxi*0.9;
-			else if (maxi>6000 && maxi<=9000)
-			changelower=maxi*0.6;
-			else if (maxi>3500 && maxi<=6000)
-			changelower=maxi*0.2;
+			print("Avebrightness; "+brightnessNeed+"  maxi"+maxi+"   countregion; "+countregion);
 			
-			if(applyV>1000 && maxi>9000)
-			changelower=0;
+			if(brightnessNeed>40000){
+				
+				applyV2Ori=applyV2;//61539
+				applyV2=applyV2*(brightnessNeed/40000);
+				
+				if(applyV2>65534)
+				applyV2=65534;
+				
+				print("Too bright, applyV2 decreased from "+applyV2Ori+" to "+applyV2);
+			}
+			if(sigsize>=MinSigSize){
+				//				setBatchMode(false);
+				//				updateDisplay();
+				//				a
+				
+				selectWindow("MIPDUP.tif");
+				selectImage(MIPDUPid);
+				close();
+				numtry=0;
+				if (maxi<1000 && brightnessNeed<2000){
+					
+					print("Decreasing maxi; original maxi = "+maxi);
+					minus2=-50;
+					Orimaxi=maxi; avebrightness=0;
+					
+					while(maxi<1000 && avebrightness<2000){
+						
+						minus2=minus2-50;
+						selectImage(MIP2);//MIP
+						run("Duplicate...", "title=MIPDUP2.tif");
+						MIPthresholding=getTitle();
+						
+						print("minus2; "+minus2+"  applyV2; "+applyV2+"  maxi; "+maxi);
+						
+						if(applyV2+minus2>80)
+						setMinAndMax(min, applyV2+minus2);
+						else{
+							//Orimaxi
+							break;
+						}
+						
+						run("Apply LUT");
+						
+						if(getHeight==512 || getHeight==592){
+							if(getWidth==1024 || getWidth==1184){
+								tissue="Brain";
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+							}
+						}else if (getHeight==1024 || getHeight==1100){
+							if(getWidth==512){
+								tissue="VNC";
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+							}
+						}else{//	if(getHeight==512 && getWidth==1024){
+							
+							newImage("MaskMIP.tif", "16-bit", getWidth, getHeight, 1);
+							setForegroundColor(255, 255, 255);
+							makeRectangle(round(getWidth*(162/1499)), round(getHeight*(131/833)), round(getWidth*(1150/1499)), round(getHeight*(508/833)));
+							run("Make Inverse");
+							run("Fill", "slice");
+							
+							
+							//		setBatchMode(false);
+							//			updateDisplay();
+							//			a
+							
+							imageCalculator("Max", MIPthresholding,"MaskMIP.tif");
+							
+							selectWindow("MaskMIP.tif");
+							close();
+							
+							selectWindow(MIPthresholding);
+						}
+						
+						
+						maxcounts=0;	 medianNum=400; 
+						getHistogram(values, counts, 65535);
+						
+						////Average value
+						total=0;
+						
+						for(ix=0; ix<getWidth; ix++){
+							for(iy=0; iy<getHeight; iy++){
+								pxv = getPixel(ix,iy);
+								total= total+pxv;
+								
+							}
+						}//for(ix=0; ix<getWidth; ix++){
+						
+						//for(iave=1; iave<65535; iave++){
+						//	total=total+(counts[iave]*iave);
+						//					}
+						
+						avebrightness=round(total/(getHeight*getWidth));
+						
+						print("avebrightness; "+avebrightness);
+						
+						
+						//		if(avebrightness>2000){
+						//			setBatchMode(false);
+						//							updateDisplay();
+						//							a
+						//		}
+						
+						for(i32=5; i32<countregion-medianNum; i32++){
+							
+							sumVal20=0; 
+							
+							for(aveval=i32; aveval<i32+medianNum; aveval++){
+								Val20=counts[aveval];
+								sumVal20=sumVal20+(Val20*aveval);
+							}
+							AveVal20=sumVal20/medianNum;
+							
+							if(AveVal20>maxcounts){
+								maxcounts=AveVal20;
+								maxi=round(i32+(medianNum/2));
+								//			print("maxi; "+maxi+"   minus2; "+minus2);
+							}
+						}//		for(i3=5; i3<countregion-medianNum; i3++){
+						
+						if(isOpen(MIPthresholding)){
+							selectWindow(MIPthresholding);
+							
+							//		setBatchMode(false);
+							//						updateDisplay();
+							//					a
+							
+							close();
+						}
+						numtry=numtry+1;
+					}//while(maxi>7000){
+					
+					if(maxi<3000){
+						applyV2 = applyV2+minus2;
+						RealapplyV= round(applyV2*(Inimax/4095));
+					}
+					
+					print("Adjusted maxi; = "+maxi+"   minus2; "+minus2+"   RealapplyV; "+RealapplyV);
+					changelower=maxi*0.5;
+					
+					minus = minus2;
+					
+				}else if (maxi>9000)
+				changelower=maxi*0.9;
+				else if (maxi>3500 && maxi<=6000)
+				changelower=maxi*0.6;
+				else if (maxi>6000 && maxi<=9000)
+				changelower=maxi*0.7;
+				else if (maxi>2500 && maxi<=3500)
+				changelower=maxi*0.2;
+				else if (maxi<=2500)
+				changelower=0;
+				
+				
+				//	if(applyV>1000 && maxi>9000)
+				//		changelower=0;
+			}//if(sigsize>=1){
+			if(sigsize<MinSigSize){
+				applyV2 = 65535;
+				
+				if(applyV2>65535)
+				applyV2=65535;
+				
+				if(DefMaxValue==4095)
+				RealapplyV= round((applyV2/16)*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
+				else if (DefMaxValue==255)
+				RealapplyV=((applyV2/(16*16))*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
+				else if (DefMaxValue==65535)
+				RealapplyV= round(applyV2*(Inimax/DefMaxValue));// adjusting from 65535 to 4095
+				
+				print("sigsize too small, 2x lower brightness; sigsize; "+sigsize+"   RealapplyV; "+RealapplyV+"  applyV2; "+applyV2);
+				
+				selectWindow(stacktoApply);
+				selectImage(stack);
+				
+				run("Z Project...", "projection=[Max Intensity]");
+				MIPaveMeasure=getImageID();
+				
+				run("Three D Ave");
+				print("end");
+				logsum=getInfo("log");
+				close();
+				aveIndex = lastIndexOf(logsum, "AVEsamp;");
+				endIndex = lastIndexOf(logsum, "end");
+				
+				avesamp = substring(logsum, aveIndex+9, endIndex-1);
+				
+				print("avesamp; "+avesamp);
+				avesamp = parseFloat(avesamp);//Chaneg string to number
+				
+				maxi=round(avesamp);
+				
+				//changelower=maxi*0.4;
+				//if(maxiZero==1)
+				changelower=maxi*0.9;
+			}
 			
-			if(lowerweight==0)
-			changelower=0;
+			print("lower threshold; 	"+changelower+"   maxi; "+maxi);
 			
-			print("2089 lower threshold; 	"+changelower+"   maxi; "+maxi);
 			
 			//		setBatchMode(false);
 			//		updateDisplay();
 			//		a
 			
 		}//if(lowthreM=="Peak Histogram"){
+		
+		selectWindow(stacktoApply);
+		selectImage(stack);
 		
 		if(lowthreM=="Auto-threshold"){
 			
@@ -2280,14 +2775,47 @@ function brightnessapply(applyV, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMas
 			
 			if(changelower>250)
 			changelower=150;
-		}//if(lowthreM=="Auto-threshold"){
+		}//if(lowthreM=="Auto-threshold")
 		
-		close();
+//		if(lowerweight==0)
+//		changelower=0;
+		//	close();
 		selectWindow(stacktoApply);
-		changelower=round(changelower);
-		setMinAndMax(changelower, 65535);//subtraction
+		selectImage(stack);
 		
+		if(sigsize>=MinSigSize){
+			setMinAndMax(0, applyV2);//subtraction
+			run("Apply LUT", "stack");
+		}
+		
+		applyV=applyV2;
+		
+		run("Max value");
+		logsum=getInfo("log");
+		maxStartindex=lastIndexOf(logsum,"Maxvalue");
+		maxEndindex=lastIndexOf(logsum,"Minvalue");
+		maxvalue=substring(logsum, maxStartindex+10, maxEndindex-2);
+		maxvalue=round(maxvalue);
+		
+		print("stack maxvalue; "+maxvalue);
+		
+	//		setBatchMode(false);
+	//				updateDisplay();
+	//		a
+		
+		changelower=round(changelower);
+		if(changelower!=0){
+			setMinAndMax(changelower, maxvalue);//subtraction
+			run("Apply LUT", "stack");
+		}
+		
+		
+		
+		setMinAndMax(0, 65535);
 		run("8-bit");
+		
+		brightnessapplyArray[0] = applyV;
+		brightnessapplyArray[1] = RealapplyV;
 	}//if(bitd==16){
 }//function brightnessapply(applyV, bitd){
 
@@ -2354,6 +2882,7 @@ function basicoperation(BasicMIP){
 		if(tempmaskEXI==1){
 			open(GradientPath);
 		}else{
+			print("Choose a Directory for Gradient.tif");
 			Gradient=getDirectory("Choose a Directory for Gradient.tif");
 			GradientPath=Gradient+"Gradient.tif";
 			open(GradientPath);
@@ -2402,7 +2931,7 @@ function basicoperation(BasicMIP){
 	BasicMIP[1]=max;
 }
 
-function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand) {//"Time-Lapse Color Coder" 
+function ColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand) {//"Time-Lapse Color Coder" 
 	
 	if(usingLUT=="royal")
 	var Glut = "royal";	//default LUT
@@ -2414,9 +2943,20 @@ function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFram
 	
 	getDimensions(width, height, channels, slices, frames);
 	rename("Original_Stack.tif");
-	
+	GammaON=true;
 	//	setBatchMode(false);
-	
+	if(GammaON==true){
+		
+		run("Gamma ", "gamma=1.40 3d in=InMacro cpu=6");
+		gamma = getTitle();
+		
+		selectWindow("Original_Stack.tif");
+		close();
+		
+		selectWindow(gamma);
+		rename("Original_Stack.tif");
+		print("GAMMA 1.4 applied");
+	}
 	
 	
 	if(frames>slices)
@@ -2525,7 +3065,7 @@ function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFram
 	}//if (GFrameColorScaleCheck==1){
 	run("Select All");
 	
-}//function ColorDepthCreator(slicesOri, applyV, width, AutoBRV, bitd) {//"Time-Lapse Color Coder" 
+}//function ColorCoder(slicesOri, applyV, width, AutoBRV, bitd) {//"Time-Lapse Color Coder" 
 
 function CreateScale(lutstr, beginf, endf, reverse0){
 	ww = 256;
@@ -2691,26 +3231,103 @@ function CropOP (MIPtype,applyV,colorscale){
 	setPasteMode("Copy");
 }
 
-function BackgroundMask (tissue,JFRCpath,VncMaskpath,MIPapply,bitd){
+function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd){
 	
+	brightnessNeed=BackgroundMaskArray[0];
+	
+	print("tissue; "+tissue);
+	
+	MaskName=0;
 	if(tissue=="Brain"){
-		filename="JFRC2010_Mask.tif";
+		
+		if(getHeight==512){
+			MaskName="JFRC2010_Mask.tif";
+			BrightnessAdjustMaskValue = 65535/46447;
+		}
+		if(getHeight==592){
+			MaskName="JFRC2013_20x_Mask.tif";
+			BrightnessAdjustMaskValue = 65535/40972;
+		}
 		openPath=JFRCpath;
 	}else if (tissue=="VNC"){
-		filename="Mask_VNC_Female.tif";
+		
+		if(getHeight==1024){
+			MaskName="Mask_VNC_Female.tif";
+			BrightnessAdjustMaskValue = 65535/29988;
+		}
+		
+		if(getHeight==1100){
+			MaskName="Mask_VNC_Male.tif";
+			BrightnessAdjustMaskValue = 65535/29700;
+		}
 		openPath=VncMaskpath;
 	}
 	
-	FilePathArray=newArray(openPath, filename,"Open");
-	fileOpen(FilePathArray);
+	print("Mask path; "+openPath);
+	maskExist=File.exists(openPath);
+	if(maskExist==1){
+		print("Used a Mask for background subtraction.");
+		open(openPath);
+		
+		objective="40x";
+		if(objective=="40x" &&	MaskName=="JFRC2010_Mask.tif"){
+			makePolygon(813,90,672,431,840,503,1022,488,1020,113);
+			setForegroundColor(0, 0, 0);
+			run("Fill", "slice");
+			makePolygon(177,56,355,453,227,507,1,505,12,89);
+			run("Fill", "slice");
+			BrightnessAdjustMaskValue = 65535/25266;
+		}
+		
+		if(bitd==8)
+		run("8-bit");
+		
+		selectWindow(MIPapply);
+		MIPid = getImageID();
+		
+		GammaON=true;
+		//	setBatchMode(false);
+		if(GammaON==true){
+			
+			run("Gamma ", "gamma=1.40 in=InMacro cpu=6");
+			gamma = getTitle();
+			
+			selectWindow(MIPapply);
+			close();
+			
+			selectWindow(gamma);
+			rename(MIPapply);
+			MIPid = getImageID();
+			print("GAMMA 1.4 applied to 2D");
+		}
+		
+		imageCalculator("Min", MIPapply,MaskName);
+		run("Three D Ave");
+		
+		selectImage(MIPid);
+		
+		//setBatchMode(false);
+		//		updateDisplay();
+		//		a
+		
+		brightnessNeed = getTitle();
+		brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
+		brightnessNeed = round(brightnessNeed);
+		
+		brightnessNeed= round(brightnessNeed*BrightnessAdjustMaskValue);
+		
+		rename(MIPapply);
+		
+		//imageCalculator("Max", MIPapply,filename);
+		
+		
+		selectWindow(MaskName);
+		close();
+	}
 	
-	imageCalculator("Max", MIPapply,filename);
-	
-	selectWindow(filename);
-	close();
+	BackgroundMaskArray[0]=brightnessNeed;
 	
 	selectWindow(MIPapply);
-	
 }
 
 
@@ -2722,8 +3339,8 @@ function fileOpen(FilePathArray){
 	//	print(MIPname+"; "+FilePath);
 	if(isOpen(MIPname)){
 		selectWindow(MIPname);
-		tempMask=getDirectory("image");
-		FilePath=tempMask+MIPname;
+		tempMaskDir=getDirectory("image");
+		FilePath=tempMaskDir+MIPname;
 	}else{
 		if(FilePath==0){
 			
@@ -2739,8 +3356,9 @@ function fileOpen(FilePathArray){
 				if(OpenorNot!="DontOpen")
 				open(FilePath);
 			}else{
-				tempMask=getDirectory("Choose a Directory for "+MIPname+"");
-				FilePath=tempMask+MIPname;
+				print("Choose a Directory for "+MIPname+"");
+				tempMaskDir=getDirectory("Choose a Directory for "+MIPname+"");
+				FilePath=tempMaskDir+MIPname;
 				if(OpenorNot!="DontOpen")
 				open(FilePath);
 			}
@@ -2751,8 +3369,9 @@ function fileOpen(FilePathArray){
 					open(FilePath);
 				}
 			}else{
-				tempMask=getDirectory("Choose a Directory for "+MIPname+"");
-				FilePath=tempMask+MIPname;
+				print("Choose a Directory for "+MIPname+"");
+				tempMaskDir=getDirectory("Choose a Directory for "+MIPname+"");
+				FilePath=tempMaskDir+MIPname;
 				if(OpenorNot!="DontOpen")
 				open(FilePath);
 			}
@@ -2760,6 +3379,7 @@ function fileOpen(FilePathArray){
 	}//if(isOpen("JFRC2013_63x_Tanya.nrrd")){
 	
 	FilePathArray[0]=FilePath;
+	FilePathArray[3]=tempMaskDir;
 }
 
 function leftPad(n, width) {
