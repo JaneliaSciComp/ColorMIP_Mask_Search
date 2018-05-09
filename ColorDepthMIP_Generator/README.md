@@ -18,7 +18,7 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0508_2018
 ![ScreenShot0](../../images/MIP_generator.jpg)
 ### Parameters:
  - Automatic Brightness adjustment: Automatic brightness adjustment ON/OFF.
- - Add color scale: Adding the color scale bar on the left top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
+ - Add color scale: Adding the color scale bar on the right top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
  - Reversed color: The order of color is reversed with ON setting.
  - VNC (Expand canvas for scale-bar): If the sample is aligned VNC, this setting needs to be ON.
  - Skip MIP creation for already made in the save directory: will skip MIP creation if the MIP file is existing within the saving directory
