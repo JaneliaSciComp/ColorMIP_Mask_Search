@@ -15,7 +15,7 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0508_2018
  1. Select directory that contains 3D stacks to be color depth MIP
  2. Select directory for saving MIPs
  
-![ScreenShot0](../images/scr0.png)
+![ScreenShot0](../images/MIP_generator.jpg)
 ### Parameters:
  - Automatic Brightness adjustment: Automatic brightness adjustment ON/OFF.
  - Add color scale: Adding the color scale bar on the left top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
