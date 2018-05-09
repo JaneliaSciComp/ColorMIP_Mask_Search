@@ -23,6 +23,7 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0508_2018
  - VNC (Expand canvas for scale-bar): If the sample is aligned VNC, this setting needs to be ON.
  - Skip MIP creation for already made in the save directory: will skip MIP creation if the MIP file is existing within the saving directory
 - DSLT version:
+
  Normal: Basically neuron fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment
 
  Line: More sensitive for the neuron fiber based brightness adjustment.
