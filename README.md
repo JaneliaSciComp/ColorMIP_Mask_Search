@@ -46,4 +46,4 @@ A red x (cross-hair) will now appear at the same position in both images.
  5. ctrl + click will create a substack with the Result table from the result stack.
  
  ## Demo movie
- ![Demomovie](../images/ColorMIPSerach.mp4)(https://youtu.be/JVZs19yvEqY)
+ ![Demomovie](../images/MIPsearchDemo.jpg)(https://youtu.be/JVZs19yvEqY)
