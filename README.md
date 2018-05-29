@@ -44,3 +44,6 @@ A red x (cross-hair) will now appear at the same position in both images.
  3. Run macro (only accepts one open window). Then Result window will be open.
  4. Shift + click on the result stack will add the image name into the Result table.
  5. ctrl + click will create a substack with the Result table from the result stack.
+ 
+ ## Demo movie
+ [![Demomovie](../images/MIPsearchDemo.jpg)](https://youtu.be/JVZs19yvEqY)
