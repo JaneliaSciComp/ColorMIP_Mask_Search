@@ -1,19 +1,15 @@
 import ij.*;
 import ij.io.*;
 import ij.plugin.filter.*;
-import ij.plugin.PlugIn;
 import ij.process.*;
 import ij.gui.*;
-import java.math.*;
 import java.io.*;
 import java.util.Arrays;
-import java.net.*;
-import ij.Macro.*;
-import java.awt.*;
-//import ij.macro.*;
-import ij.gui.GenericDialog.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.*;
-import java.lang.*;
 
 
 public class ColorMIP_Mask_Search implements PlugInFilter
@@ -25,6 +21,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 	ImagePlus newimp, newimpOri;
 	String linename,LineNo, LineNo2,preLineNo="A",FullName,LineName,arrayName,PostName;
 	String args [] = new String[10],PreFullLineName,ScorePre,TopShortLinename;
+	
+	ExecutorService m_executor;
 	
 	boolean DUPlogon;
 
@@ -58,7 +56,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//	IJ.log(" wList;"+String.valueOf(wList));
 		
 		this.imp = imp;
-		if(imp.getType()!=imp.COLOR_RGB){
+		if(imp.getType()!=ImagePlus.COLOR_RGB){
 			IJ.showMessage("Error", "Plugin requires RGB image");
 			return 0;
 		}
@@ -66,42 +64,6 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		
 		//	IJ.log(" noisemethod;"+String.valueOf(ff));
 	}
-
-	public int[] get_mskpos_array(ImageProcessor msk, int thresm){
-		int sumpx = msk.getPixelCount();
-		ArrayList<Integer> pos = new ArrayList<Integer>();
-		int pix, red, green, blue;
-		for(int n4=0; n4<sumpx; n4++){
-			
-			pix= msk.get(n4);//Mask
-			
-			red = (pix>>>16) & 0xff;//mask
-			green = (pix>>>8) & 0xff;//mask
-			blue = pix & 0xff;//mask
-			
-			if(red>thresm || green>thresm || blue>thresm)
-				pos.add(n4);
-		}
-		return pos.stream().mapToInt(i -> i).toArray();
-	}
-
-	public int[] shift_mskpos_array(int[] src, int xshift, int yshift, int w, int h){
-		ArrayList<Integer> pos = new ArrayList<Integer>();
-		int x, y, z;
-		int ypitch = w;
-		int zpitch = h*w;
-		for(int i = 0; i < src.length; i++) {
-			int val = src[i];
-			x = (val % ypitch) + xshift;
-			y = val / ypitch + yshift;
-			if (x >= 0 && x < w && y >= 0 && y < h)
-				pos.add(y*w+x);
-			else
-				pos.add(-1);
-		}
-		return pos.stream().mapToInt(i -> i).toArray();
-	}
-
 
 	public String getZeroFilledNumString(int num, int digit) {
 		String stri = Integer.toString(num);
@@ -126,311 +88,6 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		return strd;
 	}
 
-	public int calc_score(ImageProcessor src, int[] srcmaskposi, byte[] tar, int[] tarmaskposi, int th, double pixfludub, byte[] coloc) {
-		int masksize = srcmaskposi.length <= tarmaskposi.length ? srcmaskposi.length : tarmaskposi.length;
-		int width = src.getWidth();
-		int height = src.getHeight();
-		ColorProcessor ipnew=  new ColorProcessor(width, height);
-				
-		//IJ.log(" linename;"+linename);
-		int posi = 0;
-		for(int masksig=0; masksig<masksize; masksig++){
-			if (srcmaskposi[masksig] == -1 || tarmaskposi[masksig] == -1) continue;
-			
-			int pix1= src.get(srcmaskposi[masksig]);
-			int red1 = (pix1>>>16) & 0xff;
-			int green1 = (pix1>>>8) & 0xff;
-			int blue1 = pix1 & 0xff;
-
-			int p = tarmaskposi[masksig]*3;
-			int red2 = tar[p] & 0xff;
-			int green2 = tar[p+1] & 0xff;
-			int blue2 = tar[p+2] & 0xff;
-						
-			if(red2>th || green2>th || blue2>th){
-				
-				double pxGap = calc_score_px(red1, green1, blue1, red2, green2, blue2); 
-				
-				if(pxGap<=pixfludub){
-					if(coloc!=null) {
-						coloc[p] = tar[p];
-						coloc[p+1] = tar[p+1];
-						coloc[p+2] = tar[p+2];
-					}
-					posi++;
-				}else if(pxGap==1000)
-				IJ.log("There is 255 x2 value");
-				
-			}//if(red2>th || green2>th || blue2>th){
-		}//for(int masksig=0; masksig<masksize; masksig++){
-
-		return posi;
-	}
-
-	public int calc_score(ImageProcessor src, int[] srcmaskposi, ImageProcessor tar, int[] tarmaskposi, int th, double pixfludub, ImageProcessor coloc) {
-		int masksize = srcmaskposi.length <= tarmaskposi.length ? srcmaskposi.length : tarmaskposi.length;
-		int width = src.getWidth();
-		int height = src.getHeight();
-		ColorProcessor ipnew=  new ColorProcessor(width, height);
-				
-		//IJ.log(" linename;"+linename);
-		int posi = 0;
-		for(int masksig=0; masksig<masksize; masksig++){
-			if (srcmaskposi[masksig] == -1 || tarmaskposi[masksig] == -1) continue;
-			
-			int pix1= src.get(srcmaskposi[masksig]);
-			int red1 = (pix1>>>16) & 0xff;
-			int green1 = (pix1>>>8) & 0xff;
-			int blue1 = pix1 & 0xff;
-
-			int pix2= tar.get(tarmaskposi[masksig]);
-			int red2 = (pix2>>>16) & 0xff;
-			int green2 = (pix2>>>8) & 0xff;
-			int blue2 = pix2 & 0xff;
-
-			if(red2>th || green2>th || blue2>th){
-				
-				double pxGap = calc_score_px(red1, green1, blue1, red2, green2, blue2); 
-				
-				if(pxGap<=pixfludub){
-					if(coloc!=null)
-						coloc.set(tarmaskposi[masksig], pix2);// new RGB image
-					posi++;
-				}else if(pxGap==1000)
-				IJ.log("There is 255 x2 value");
-				
-			}//if(red2>th || green2>th || blue2>th){
-		}//for(int masksig=0; masksig<masksize; masksig++){
-
-		return posi;
-	}
-
-	public double calc_score_px(int red1, int green1, int blue1, int red2, int green2, int blue2) {
-		int RG1=0; int BG1=0; int GR1=0; int GB1=0; int RB1=0; int BR1=0;
-		int RG2=0; int BG2=0; int GR2=0; int GB2=0; int RB2=0; int BR2=0;
-		int MIPtwo=0; int max1=0; int max2=0;
-		double rb1=0; double rg1=0; double gb1=0; double gr1=0; double br1=0; double bg1=0;
-		double rb2=0; double rg2=0; double gb2=0; double gr2=0; double br2=0; double bg2=0;
-		double pxGap=10000; 
-		double BrBg=0.354862745; double BgGb=0.996078431; double GbGr=0.505882353; double GrRg=0.996078431; double RgRb=0.505882353;
-		double BrGap=0; double BgGap=0; double GbGap=0; double GrGap=0; double RgGap=0; double RbGap=0;
-				
-		String checkborder="";
-				
-		if(blue1>red1 && blue1>green1){//1,2
-			if(red1>green1){
-				BR1=blue1+red1;//1
-				if(blue1!=0 && red1!=0)
-					br1= (double) red1 / (double) blue1;
-			}else{
-				BG1=blue1+green1;//2
-				if(blue1!=0 && green1!=0)
-					bg1= (double) green1 / (double) blue1;
-			}
-		}else if(green1>blue1 && green1>red1){//3,4
-			if(blue1>red1){
-				GB1=green1+blue1;//3
-				if(green1!=0 && blue1!=0)
-					gb1= (double) blue1 / (double) green1;
-			}else{
-				GR1=green1+red1;//4
-				if(green1!=0 && red1!=0)
-					gr1= (double) red1 / (double) green1;
-			}
-		}else if(red1>blue1 && red1>green1){//5,6
-			if(green1>blue1){
-				RG1=red1+green1;//5
-				if(red1!=0 && green1!=0)
-					rg1= (double) green1 / (double) red1;
-			}else{
-				RB1=red1+blue1;//6
-				if(red1!=0 && blue1!=0)
-					rb1= (double) blue1 / (double) red1;
-			}
-		}
-				
-		if(blue2>red2 && blue2>green2){
-			if(red2>green2){//1, data
-				BR2=blue2+red2;
-				if(blue2!=0 && red2!=0)
-					br2= (double) red2 / (double) blue2;
-			}else{//2, data
-				BG2=blue2+green2;
-				if(blue2!=0 && green2!=0)
-					bg2= (double) green2 / (double) blue2;
-			}
-		}else if(green2>blue2 && green2>red2){
-			if(blue2>red2){//3, data
-				GB2=green2+blue2;
-				if(green2!=0 && blue2!=0)
-					gb2= (double) blue2 / (double) green2;
-			}else{//4, data
-				GR2=green2+red2;
-				if(green2!=0 && red2!=0)
-					gr2= (double) red2 / (double) green2;
-			}
-		}else if(red2>blue2 && red2>green2){
-			if(green2>blue2){//5, data
-				RG2=red2+green2;
-				if(red2!=0 && green2!=0)
-					rg2= (double) green2 / (double) red2;
-			}else{//6, data
-				RB2=red2+blue2;
-				if(red2!=0 && blue2!=0)
-					rb2= (double) blue2 / (double) red2;
-			}
-		}
-				
-		///////////////////////////////////////////////////////					
-		if(BR1>0){//1, mask// 2 color advance core
-			if(BR2>0){//1, data
-				if(br1>0 && br2>0){
-					if(br1!=br2){
-						pxGap=br2-br1;
-						pxGap=Math.abs(pxGap);
-					}else
-						pxGap=0;
-					
-					if(br1==255 & br2==255)
-						pxGap=1000;
-				}
-			}else if (BG2>0){//2, data
-				if(br1<0.44 && bg2<0.54){
-					BrGap=br1-BrBg;//BrBg=0.354862745;
-					BgGap=bg2-BrBg;//BrBg=0.354862745;
-					pxGap=BrGap+BgGap;
-				}
-			}
-			//		IJ.log("pxGap; "+String.valueOf(pxGap)+"  BR1;"+String.valueOf(BR1)+", br1; "+String.valueOf(br1)+", BR2; "+String.valueOf(BR2)+", br2; "+String.valueOf(br2)+", BG2; "+String.valueOf(BG2)+", bg2; "+String.valueOf(bg2));
-		}else if(BG1>0){//2, mask/////////////////////////////
-			if(BG2>0){//2, data, 2,mask
-				
-				if(bg1>0 && bg2>0){
-					if(bg1!=bg2){
-						pxGap=bg2-bg1;
-						pxGap=Math.abs(pxGap);
-						
-					}else if(bg1==bg2)
-						pxGap=0;
-					if(bg1==255 & bg2==255)
-						pxGap=1000;
-				}
-				//	IJ.log(" pxGap BG2;"+String.valueOf(pxGap)+", bg1; "+String.valueOf(bg1)+", bg2; "+String.valueOf(bg2));
-			}else if(GB2>0){//3, data, 2,mask
-				if(bg1>0.8 && gb2>0.8){
-					BgGap=BgGb-bg1;//BgGb=0.996078431;
-					GbGap=BgGb-gb2;//BgGb=0.996078431;
-					pxGap=BgGap+GbGap;
-					//			IJ.log(" pxGap GB2;"+String.valueOf(pxGap));
-				}
-			}else if(BR2>0){//1, data, 2,mask
-				if(bg1<0.54 && br2<0.44){
-					BgGap=bg1-BrBg;//BrBg=0.354862745;
-					BrGap=br2-BrBg;//BrBg=0.354862745;
-					pxGap=BrGap+BgGap;
-				}
-			}
-			//		IJ.log("pxGap; "+String.valueOf(pxGap)+"  BG1;"+String.valueOf(BG1)+"  BG2;"+String.valueOf(BG2)+", bg1; "+String.valueOf(bg1)+", bg2; "+String.valueOf(bg2)+", GB2; "+String.valueOf(GB2)+", gb2; "+String.valueOf(gb2)+", BR2; "+String.valueOf(BR2)+", br2; "+String.valueOf(br2));
-		}else if(GB1>0){//3, mask/////////////////////////////
-			if(GB2>0){//3, data, 3mask
-				if(gb1>0 && gb2>0){
-					if(gb1!=gb2){
-						pxGap=gb2-gb1;
-						pxGap=Math.abs(pxGap);
-						
-						//	IJ.log(" pxGap GB2;"+String.valueOf(pxGap));
-					}else
-						pxGap=0;
-					if(gb1==255 & gb2==255)
-						pxGap=1000;
-				}
-			}else if(BG2>0){//2, data, 3mask
-				if(gb1>0.8 && bg2>0.8){
-					BgGap=BgGb-gb1;//BgGb=0.996078431;
-					GbGap=BgGb-bg2;//BgGb=0.996078431;
-					pxGap=BgGap+GbGap;
-				}
-			}else if(GR2>0){//4, data, 3mask
-				if(gb1<0.7 && gr2<0.7){
-					GbGap=gb1-GbGr;//GbGr=0.505882353;
-					GrGap=gr2-GbGr;//GbGr=0.505882353;
-					pxGap=GbGap+GrGap;
-				}
-			}//2,3,4 data, 3mask
-		}else if(GR1>0){//4mask/////////////////////////////
-			if(GR2>0){//4, data, 4mask
-				if(gr1>0 && gr2>0){
-					if(gr1!=gr2){
-						pxGap=gr2-gr1;
-						pxGap=Math.abs(pxGap);
-					}else
-						pxGap=0;
-					if(gr1==255 & gr2==255)
-						pxGap=1000;
-				}
-			}else if(GB2>0){//3, data, 4mask
-				if(gr1<0.7 && gb2<0.7){
-					GrGap=gr1-GbGr;//GbGr=0.505882353;
-					GbGap=gb2-GbGr;//GbGr=0.505882353;
-					pxGap=GrGap+GbGap;
-				}
-			}else if(RG2>0){//5, data, 4mask
-				if(gr1>0.8 && rg2>0.8){
-					GrGap=GrRg-gr1;//GrRg=0.996078431;
-					RgGap=GrRg-rg2;
-					pxGap=GrGap+RgGap;
-				}
-			}//3,4,5 data
-		}else if(RG1>0){//5, mask/////////////////////////////
-			if(RG2>0){//5, data, 5mask
-				if(rg1>0 && rg2>0){
-					if(rg1!=rg2){
-						pxGap=rg2-rg1;
-						pxGap=Math.abs(pxGap);
-					}else
-						pxGap=0;
-					if(rg1==255 & rg2==255)
-						pxGap=1000;
-				}
-				
-			}else if(GR2>0){//4 data, 5mask
-				if(rg1>0.8 && gr2>0.8){
-					GrGap=GrRg-gr2;//GrRg=0.996078431;
-					RgGap=GrRg-rg1;//GrRg=0.996078431;
-					pxGap=GrGap+RgGap;
-					//	IJ.log(" pxGap GR2;"+String.valueOf(pxGap));
-				}
-			}else if(RB2>0){//6 data, 5mask
-				if(rg1<0.7 && rb2<0.7){
-					RgGap=rg1-RgRb;//RgRb=0.505882353;
-					RbGap=rb2-RgRb;//RgRb=0.505882353;
-					pxGap=RbGap+RgGap;
-				}
-			}//4,5,6 data
-		}else if(RB1>0){//6, mask/////////////////////////////
-			if(RB2>0){//6, data, 6mask
-				if(rb1>0 && rb2>0){
-					if(rb1!=rb2){
-						pxGap=rb2-rb1;
-						pxGap=Math.abs(pxGap);
-					}else if(rb1==rb2)
-						pxGap=0;
-					if(rb1==255 & rb2==255)
-						pxGap=1000;
-				}
-			}else if(RG2>0){//5, data, 6mask
-				if(rg2<0.7 && rb1<0.7){
-					RgGap=rg2-RgRb;//RgRb=0.505882353;
-					RbGap=rb1-RgRb;//RgRb=0.505882353;
-					pxGap=RgGap+RbGap;
-					//	IJ.log(" pxGap RG;"+String.valueOf(pxGap));
-				}
-			}
-		}//2 color advance core
-	
-		return pxGap;
-	}
-	
 	public void run(ImageProcessor ip){
 		
 		int wList [] = WindowManager.getIDList();
@@ -485,6 +142,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		boolean GCON=(boolean)Prefs.get("GCON.boolean",false);
 		boolean ShowCo=(boolean)Prefs.get("ShowCo.boolean",true);
 		int NumberSTint=(int)Prefs.get("NumberSTint.int",0);
+		int threadNum=(int)Prefs.get("threadNum.int",8);
 		
 		if(datafile >= imageno){
 			int singleslice=0; int Maxsingleslice=0; int MaxStack=0;
@@ -566,6 +224,9 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 			dupnumstr[i] = Integer.toString(i);
 		gd.addChoice("Duplicated line numbers; (only for GMR & VT), 0 = no check", dupnumstr, dupnumstr[dupline]); //Mask
 		
+		gd.setInsets(20, 0, 0);
+		gd.addNumericField("Thread", threadNum, 0);
+		
 		//gd.setInsets(0, 372, 0);
 		//gd.addCheckbox("Show Duplication log",DUPlogon);
 		
@@ -611,6 +272,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		pixflu=(double)gd.getNextNumber();
 		dupline=Integer.parseInt(dupnumstr[gd.getNextChoiceIndex()]);
 		DUPlogon = false;
+		threadNum = (int)gd.getNextNumber();
 		xyshift=Integer.parseInt( ((String)gd.getNextRadioButton()).substring(0,1) );
 				
 		String thremethodSTR="Two windows";
@@ -619,6 +281,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		logon = gd.getNextBoolean();
 		GCON = gd.getNextBoolean();
 		ShowCo = gd.getNextBoolean();
+		
 		
 		if(GCON==true)
 		System.gc();
@@ -670,11 +333,12 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		Prefs.set("GCON.boolean",GCON);
 		Prefs.set("ShowCo.boolean",ShowCo);
 		Prefs.set("NumberSTint.int",NumberSTint);
+		Prefs.set("threadNum.int",threadNum);
 		
 		double pixfludub=pixflu/100;
 		//	IJ.log(" pixfludub;"+String.valueOf(pixfludub));
 		
-		double pixThresdub= pixThres/100;///10000
+		final double pixThresdub = pixThres/100;///10000
 		//	IJ.log(" pixThresdub;"+String.valueOf(pixThresdub));
 		///////		
 		ImagePlus imask = WindowManager.getImage(wList[Mask]); //Mask
@@ -687,7 +351,6 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		nip1 = NegMask > 0 ? inegmask.getProcessor() : null; //Negative Mask
 		int slicenumber = idata.getStackSize();
 		
-		int sumpx = ip1.getPixelCount();
 		int width = imask.getWidth();
 		int height = imask.getHeight();
 		
@@ -700,102 +363,38 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//	IJ.log("maxvalue; "+maxvalue2+"	 gap;	"+gap);
 		
 		
-		ImageStack st3 = idata.getStack();
+		final ImageStack st3 = idata.getStack();
 		int posislice = 0;
 		
 		double posipersent2 = 0;
 		double pixThresdub2 = 0;
 		
-		String MIPtwoST="";
+		ColorMIPMaskCompare cc = new ColorMIPMaskCompare (ip1, Thresm, mirror_mask, nip1, NegThresm, mirror_negmask, Thres, pixfludub, xyshift);
+		m_executor = Executors.newFixedThreadPool(threadNum);
 		
-		int [] maskposi = get_mskpos_array(ip1, Thresm);
-		int [] negmaskposi = nip1 != null ? get_mskpos_array(nip1, NegThresm) : null;
-		int masksize = maskposi.length;
-		int negmasksize = nip1 != null ? negmaskposi.length : 0;
-		
-		int [][] maskposilist = new int[1+(xyshift/2)*8][];
-		int [][] negmaskposilist = new int[1+(xyshift/2)*8][];
-		int [][] maskposilist_mirror = new int[1+(xyshift/2)*8][];
-		int [][] negmaskposilist_mirror = new int[1+(xyshift/2)*8][];
-
-		maskposilist[0] = maskposi;
-		if (negmaskposi == null) negmaskposilist = null;
-		else negmaskposilist[0] = negmaskposi;
-
-		int maskid = 0;
-		if (xyshift >= 2) {
-			for (int xx = -2; xx <= 2; xx += 2) {
-				for (int yy = -2; yy <= 2; yy += 2) {
-					maskposilist[maskid] = shift_mskpos_array(maskposi, xx, yy, width, height);
-					if (negmaskposilist != null)
-						negmaskposilist[maskid] = shift_mskpos_array(negmaskposi, xx, yy, width, height);
-					maskid++;
-				}
-			}
-		}
-		if (xyshift >= 4) {
-			for (int xx = -4; xx <= 4; xx += 4) {
-				for (int yy = -4; yy <= 4; yy += 4) {
-					if (xx == 0 && yy == 0) continue;
-					maskposilist[maskid] = shift_mskpos_array(maskposi, xx, yy, width, height);
-					if (negmaskposilist != null)
-						negmaskposilist[maskid] = shift_mskpos_array(negmaskposi, xx, yy, width, height);
-					maskid++;
-				}
-			}
-		}
-		
-		if (mirror_mask && maskposi != null) {
-			int x, y, z;
-			int ypitch = width;
-			int zpitch = height*width;
-			for (int i = 0; i < maskposilist.length; i++) {
-				maskposilist_mirror[i] = maskposilist[i].clone();
-				for(int j = 0; j < masksize; j++) {
-					int val = maskposilist[i][j];
-					x = val % ypitch;
-					maskposilist_mirror[i][j] = val + (width-1) - 2*x;
-				}
-			}
-		} else
-			maskposilist_mirror = null;
-		
-		if (mirror_negmask && negmaskposi != null) {
-			int x, y, z;
-			int ypitch = width;
-			int zpitch = height*width;
-			for (int i = 0; i < negmaskposilist.length; i++) {
-				negmaskposilist_mirror[i] = negmaskposilist[i].clone();
-				for(int j = 0; j < negmasksize; j++) {
-					int val = negmaskposilist[i][j];
-					x = val % ypitch;
-					negmaskposilist_mirror[i][j] = val + (width-1) - 2*x;
-				}
-			}
-		} else
-			negmaskposilist_mirror = null;
-		
-
-		int maskpos_st = negmaskposi != null ? Math.min(maskposilist[0][0], negmaskposilist[0][0])*3 : maskposilist[0][0]*3;
-		int maskpos_ed = negmaskposi != null ? Math.max(maskposilist[maskposilist.length-1][masksize-1], negmaskposilist[negmaskposilist.length-1][negmasksize-1])*3 : maskposilist[maskposilist.length-1][masksize-1]*3;
+		int maskpos_st = cc.getMaskStartPos()*3;
+		int maskpos_ed = cc.getMaskEndPos()*3;
 		int stripsize = maskpos_ed-maskpos_st+3;
 
 		long start, end;
 		start = System.nanoTime();
-
-		HashMap<String,Integer>smap = new HashMap<String,Integer>(1000);
-		HashMap<String,Long>smapl = new HashMap<String,Long>(1000);
 
 		//IJ.log(" masksize;"+String.valueOf(masksize));
 
 		ArrayList<String> srlabels = new ArrayList<String>();
 		ArrayList<String> finallbs = new ArrayList<String>();
 		HashMap<String, SearchResult> srdict = new HashMap<String, SearchResult>(1000);
-		
-		
+
 		try{
+			final int fslicenum = slicenumber;
+			final int fthreadnum = threadNum;
+			final boolean fShowCo = ShowCo;
+			final boolean flogon = logon;
+			final boolean flogNan = logNan;
+			final int fNumberSTint = NumberSTint;
+			final int flabelmethod = labelmethod;
 			if (st3.isVirtual()) {
-				VirtualStack vst = (VirtualStack)st3;
+				final VirtualStack vst = (VirtualStack)st3;
 				if (vst.getDirectory() == null) {
 					FileInfo fi = idata.getOriginalFileInfo();
 					if (fi.directory.length()>0 && !(fi.directory.endsWith(Prefs.separator)||fi.directory.endsWith("/")))
@@ -822,57 +421,10 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 						
 						linename=st3.getSliceLabel(islice);
 						
-						int posi = 0;
-						double posipersent = 0.0;
-						for (int mid = 0; mid < maskposilist.length; mid++) {
-							int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist[mid], Thres, pixfludub, colocs);
-							if (tmpposi > posi) {
-								posi = tmpposi;
-								posipersent= (double) posi/ (double) masksize;
-							}
-						}
-						if (nip1 != null) {
-							int nega = 0;
-							double negapersent = 0.0;
-							for (int mid = 0; mid < negmaskposilist.length; mid++) {
-								int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist[mid], Thres, pixfludub, null);
-								if (tmpnega > nega) {
-									nega = tmpnega;
-									negapersent = (double) nega/ (double) negmasksize;
-								}
-							}
-							posipersent -= negapersent;
-							posi = (int)Math.round((double)posi*(1.0-negapersent));
-						}
-
-						if (maskposilist_mirror != null) {
-							int mirror_posi = 0;
-							double mirror_posipersent = 0.0;
-							for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
-								int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist_mirror[mid], Thres, pixfludub, colocs);
-								if (tmpposi > mirror_posi) {
-									mirror_posi = tmpposi;
-									mirror_posipersent= (double) mirror_posi/ (double) masksize;
-								}
-							}
-							if (nip1 != null) {
-								int nega = 0;
-								double negapersent = 0.0;
-								for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
-									int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist_mirror[mid], Thres, pixfludub, null);
-									if (tmpnega > nega) {
-										nega = tmpnega;
-										negapersent = (double) nega/ (double) negmasksize;
-									}
-								}
-								mirror_posipersent -= negapersent;
-								mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-							}
-							if (posi < mirror_posi) {
-								posi = mirror_posi;
-								posipersent = mirror_posipersent;
-							}
-						}
+						ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
+						
+						int posi = res.matchingPixNum;
+						double posipersent = res.matchingPct;
 						
 						if(posipersent<=pixThresdub){
 							if (logon==true && logNan==true)
@@ -913,11 +465,92 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 					f.close();
 					
 				} else {
-					String directory = vst.getDirectory();
-					if (directory.length()>0 && !(directory.endsWith(Prefs.separator)||directory.endsWith("/")))
-						directory += Prefs.separator;
-					long size = width*height*3;
+					String dirtmp = vst.getDirectory();
+					if (dirtmp.length()>0 && !(dirtmp.endsWith(Prefs.separator)||dirtmp.endsWith("/")))
+						dirtmp += Prefs.separator;
+					final String directory = dirtmp;
+					final long size = width*height*3;
+					final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
+					for (int ithread = 0; ithread < threadNum; ithread++) {
+						final int ftid = ithread;
+						tasks.add(new Callable<ArrayList<SearchResult>>() {
+							public ArrayList<SearchResult> call() {
+								ArrayList<SearchResult> out = new ArrayList<SearchResult>();
+								for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < fslicenum/fthreadnum; slice++, count++) {
+									byte [] impxs = new byte[(int)size];
+									byte [] colocs = null;
+									if (fShowCo) colocs = new byte[(int)size];
+									String datapath = directory + vst.getFileName(slice);
+									
+									try {
+										RandomAccessFile f = new RandomAccessFile(datapath, "r");
+										TiffDecoder tfd = new TiffDecoder(directory, vst.getFileName(slice));
+										if (tfd == null) continue;
+										FileInfo[] fi_list = tfd.getTiffInfo();
+										if (fi_list == null) continue;
+										long loffset = fi_list[0].getOffset();
 										
+										f.seek(loffset+(long)maskpos_st);
+										f.read(impxs, maskpos_st, stripsize);
+										
+										String linename = st3.getSliceLabel(slice);
+										
+										ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
+										
+										int posi = res.matchingPixNum;
+										double posipersent = res.matchingPct;
+										
+										if(posipersent<=pixThresdub){
+											if (flogon==true && flogNan==true)
+												IJ.log("NaN");
+										}else if(posipersent>pixThresdub){
+											double posipersent3=posipersent*100;
+											double pixThresdub3=pixThresdub*100;
+										
+											posipersent3 = posipersent3*100;
+											posipersent3 = Math.round(posipersent3);
+											double posipersent2 = posipersent3 /100;
+										
+											pixThresdub3 = pixThresdub3*100;
+											pixThresdub3 = Math.round(pixThresdub3);
+											
+											if(flogon==true && flogNan==true)// sort by name
+												IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+											
+											String title="";
+											if(fNumberSTint==0){
+												String numstr = getZeroFilledNumString(posipersent2, 3, 2);
+												title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+											}
+											else if(fNumberSTint==1) {
+												String posiST=getZeroFilledNumString(posi, 4);
+												title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
+											}
+											out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
+										}
+										f.close();
+									} catch (IOException e) {
+										continue;
+									}
+								}
+								return out;
+							}
+						});
+					}
+					try {
+						List<Future<ArrayList<SearchResult>>> taskResults = m_executor.invokeAll(tasks);
+						for (Future<ArrayList<SearchResult>> future : taskResults) {
+							for (SearchResult r : future.get()) {
+								srlabels.add(r.m_name);
+								srdict.put(r.m_name, r);
+								
+								posislice=posislice+1;
+							}
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+					/*					
 					for (int islice=1; islice<=slicenumber ; islice++){
 						if(IJ.escapePressed())
 							break;
@@ -942,58 +575,10 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 							
 							linename=st3.getSliceLabel(islice);
 							
-							int posi = 0;
-							double posipersent = 0.0;
-							for (int mid = 0; mid < maskposilist.length; mid++) {
-								int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist[mid], Thres, pixfludub, colocs);
-								if (tmpposi > posi) {
-									posi = tmpposi;
-									posipersent= (double) posi/ (double) masksize;
-								}
-							}
-							if (nip1 != null) {
-								int nega = 0;
-								double negapersent = 0.0;
-								for (int mid = 0; mid < negmaskposilist.length; mid++) {
-									int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist[mid], Thres, pixfludub, null);
-									if (tmpnega > nega) {
-										nega = tmpnega;
-										negapersent = (double) nega/ (double) negmasksize;
-									}
-								}
-								posipersent -= negapersent;
-								posi = (int)Math.round((double)posi*(1.0-negapersent));
-							}
-
-							if (maskposilist_mirror != null) {
-								int mirror_posi = 0;
-								double mirror_posipersent = 0.0;
-								for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
-									int tmpposi = calc_score(ip1, maskposi, impxs, maskposilist_mirror[mid], Thres, pixfludub, colocs);
-									if (tmpposi > mirror_posi) {
-										mirror_posi = tmpposi;
-										mirror_posipersent= (double) mirror_posi/ (double) masksize;
-									}
-								}
-								if (nip1 != null) {
-									int nega = 0;
-									double negapersent = 0.0;
-									for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
-										int tmpnega = calc_score(nip1, negmaskposi, impxs, negmaskposilist_mirror[mid], Thres, pixfludub, null);
-										if (tmpnega > nega) {
-											nega = tmpnega;
-											negapersent = (double) nega/ (double) negmasksize;
-										}
-									}
-									mirror_posipersent -= negapersent;
-									mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-								}
+							ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
 							
-								if (posi < mirror_posi) {
-									posi = mirror_posi;
-									posipersent = mirror_posipersent;
-								}
-							}
+							int posi = res.matchingPixNum;
+							double posipersent = res.matchingPct;
 
 							if(posipersent<=pixThresdub){
 								if (logon==true && logNan==true)
@@ -1032,9 +617,75 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 							continue;
 						}
 					}//for (int islice=1; islice<=slicenumber ; islice++){
+					*/
 				}
 		
 			} else {
+				final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
+				for (int ithread = 0; ithread < threadNum; ithread++) {
+					final int ftid = ithread;
+					tasks.add(new Callable<ArrayList<SearchResult>>() {
+						public ArrayList<SearchResult> call() {
+							ArrayList<SearchResult> out = new ArrayList<SearchResult>();
+							for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < fslicenum/fthreadnum; slice++, count++) {
+								ColorProcessor ipnew = null;
+								if (fShowCo) ipnew = new ColorProcessor(width, height);
+								
+								ImageProcessor ip3 = st3.getProcessor(slice);
+								String linename = st3.getSliceLabel(slice);
+								
+								ColorMIPMaskCompare.Output res = cc.runSearch(ip3, ipnew);
+							
+								int posi = res.matchingPixNum;
+								double posipersent = res.matchingPct;
+								
+								if(posipersent<=pixThresdub){
+									if (flogon==true && flogNan==true)
+									IJ.log("NaN");
+								}else if(posipersent>pixThresdub){
+									double posipersent3=posipersent*100;
+									double pixThresdub3=pixThresdub*100;
+									
+									posipersent3 = posipersent3*100;
+									posipersent3 = Math.round(posipersent3);
+									double posipersent2 = posipersent3 /100;
+									
+									pixThresdub3 = pixThresdub3*100;
+									pixThresdub3 = Math.round(pixThresdub3);
+									
+									if(flogon==true && flogNan==true)// sort by name
+										IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+									
+									String title="";
+									if(fNumberSTint==0){
+										String numstr = getZeroFilledNumString(posipersent2, 3, 2);
+										title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+									}
+									else if(fNumberSTint==1) {
+										String posiST=getZeroFilledNumString(posi, 4);
+										title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
+									}
+									out.add(new SearchResult(title, slice, 0L, null, null, ip3, ipnew));
+								}
+							}
+							return out;
+						}
+					});
+				}
+				try {
+					List<Future<ArrayList<SearchResult>>> taskResults = m_executor.invokeAll(tasks);
+					for (Future<ArrayList<SearchResult>> future : taskResults) {
+						for (SearchResult r : future.get()) {
+							srlabels.add(r.m_name);
+							srdict.put(r.m_name, r);
+							
+							posislice=posislice+1;
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				/*
 				for (int islice=1; islice<=slicenumber ; islice++){
 					if(IJ.escapePressed())
 						break;
@@ -1042,63 +693,16 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 					IJ.showStatus("Color MIP Mask_search; "+posislice+" / positive slices");
 					IJ.showProgress((double)islice/(double)slicenumber);
 					
-					ColorProcessor ipnew = new ColorProcessor(width, height);
+					ColorProcessor ipnew = null;
+					if (ShowCo) ipnew = new ColorProcessor(width, height);
+					
 					ip3 = st3.getProcessor(islice);// data
 					linename=st3.getSliceLabel(islice);
 
-					int posi = 0;
-					double posipersent = 0.0;
-						
-					for (int mid = 0; mid < maskposilist.length; mid++) {
-						int tmpposi = calc_score(ip1, maskposi, ip3, maskposilist[mid], Thres, pixfludub, ShowCo ? ipnew : null);
-						if (tmpposi > posi) {
-							posi = tmpposi;
-							posipersent= (double) posi/ (double) masksize;
-						}
-					}
-					if (nip1 != null) {
-						int nega = 0;
-						double negapersent = 0.0;
-						for (int mid = 0; mid < negmaskposilist.length; mid++) {
-							int tmpnega = calc_score(nip1, negmaskposi, ip3, negmaskposilist[mid], Thres, pixfludub, null);
-							if (tmpnega > nega) {
-								nega = tmpnega;
-								negapersent = (double) nega/ (double) negmasksize;
-							}
-						}
-						posipersent -= negapersent;
-						posi = (int)Math.round((double)posi*(1.0-negapersent));
-					}
-
-					if (maskposilist_mirror != null) {
-						int mirror_posi = 0;
-						double mirror_posipersent = 0.0;
-						for (int mid = 0; mid < maskposilist_mirror.length; mid++) {
-							int tmpposi = calc_score(ip1, maskposi, ip3, maskposilist_mirror[mid], Thres, pixfludub, ShowCo ? ipnew : null);
-							if (tmpposi > mirror_posi) {
-								mirror_posi = tmpposi;
-								mirror_posipersent= (double) mirror_posi/ (double) masksize;
-							}
-						}
-						if (nip1 != null) {
-							int nega = 0;
-							double negapersent = 0.0;
-							for (int mid = 0; mid < negmaskposilist_mirror.length; mid++) {
-								int tmpnega = calc_score(nip1, negmaskposi, ip3, negmaskposilist_mirror[mid], Thres, pixfludub, null);
-								if (tmpnega > nega) {
-									nega = tmpnega;
-									negapersent = (double) nega/ (double) negmasksize;
-								}
-							}
-							mirror_posipersent -= negapersent;
-							mirror_posi = (int)Math.round((double)mirror_posi*(1.0-negapersent));
-						}
-							
-						if (posi < mirror_posi) {
-							posi = mirror_posi;
-							posipersent = mirror_posipersent;
-						}
-					}
+					ColorMIPMaskCompare.Output res = cc.runSearch(ip3, ipnew);
+					
+					int posi = res.matchingPixNum;
+					double posipersent = res.matchingPct;
 
 					if(posipersent<=pixThresdub){
 						if (logon==true && logNan==true)
@@ -1134,6 +738,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 					}//if(posipersent>pixThresdub){
 					
 				}//for (int islice=1; islice<=slicenumber ; islice++){
+				*/
 			}
 		} catch(IOException e) {
 			e.printStackTrace();
@@ -1840,30 +1445,5 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		//	System.gc();
 	} //public void run(ImageProcessor ip){
 } //public class Two_windows_mask_search implements PlugInFilter{
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
