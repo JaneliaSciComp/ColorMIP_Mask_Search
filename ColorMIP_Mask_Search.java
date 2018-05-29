@@ -372,9 +372,9 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		ColorMIPMaskCompare cc = new ColorMIPMaskCompare (ip1, Thresm, mirror_mask, nip1, NegThresm, mirror_negmask, Thres, pixfludub, xyshift);
 		m_executor = Executors.newFixedThreadPool(threadNum);
 		
-		int maskpos_st = cc.getMaskStartPos()*3;
-		int maskpos_ed = cc.getMaskEndPos()*3;
-		int stripsize = maskpos_ed-maskpos_st+3;
+		final int maskpos_st = cc.getMaskStartPos()*3;
+		final int maskpos_ed = cc.getMaskEndPos()*3;
+		final int stripsize = maskpos_ed-maskpos_st+3;
 
 		long start, end;
 		start = System.nanoTime();
@@ -385,287 +385,183 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		ArrayList<String> finallbs = new ArrayList<String>();
 		HashMap<String, SearchResult> srdict = new HashMap<String, SearchResult>(1000);
 
-		try{
-			final int fslicenum = slicenumber;
-			final int fthreadnum = threadNum;
-			final boolean fShowCo = ShowCo;
-			final boolean flogon = logon;
-			final boolean flogNan = logNan;
-			final int fNumberSTint = NumberSTint;
-			final int flabelmethod = labelmethod;
-			if (st3.isVirtual()) {
-				final VirtualStack vst = (VirtualStack)st3;
-				if (vst.getDirectory() == null) {
-					FileInfo fi = idata.getOriginalFileInfo();
-					if (fi.directory.length()>0 && !(fi.directory.endsWith(Prefs.separator)||fi.directory.endsWith("/")))
-						fi.directory += Prefs.separator;
-					String datapath = fi.directory + fi.fileName;
-					RandomAccessFile f = new RandomAccessFile(datapath, "r");
-					long size = fi.width*fi.height*fi.getBytesPerPixel();
-					long loffset = fi.getOffset();
-										
-					for (int islice=1; islice<=slicenumber ; islice++){
-						if(IJ.escapePressed())
-							break;
-
-						byte [] impxs = new byte[(int)size];
-						byte [] colocs = null;
-						if (ShowCo) colocs = new byte[(int)size];
-
-						loffset = fi.getOffset() + (islice-1)*(size+fi.gapBetweenImages) + maskpos_st;
-						f.seek(loffset);
-						f.read(impxs, maskpos_st, stripsize);
-						
-						IJ.showStatus("Color MIP Mask_search; "+posislice+" / positive slices");
-						IJ.showProgress((double)islice/(double)slicenumber);
-						
-						linename=st3.getSliceLabel(islice);
-						
-						ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
-						
-						int posi = res.matchingPixNum;
-						double posipersent = res.matchingPct;
-						
-						if(posipersent<=pixThresdub){
-							if (logon==true && logNan==true)
-							IJ.log("NaN");
-						}else if(posipersent>pixThresdub){
-							loffset = fi.getOffset() + (islice-1)*(size+fi.gapBetweenImages);
-														
-							double posipersent3=posipersent*100;
-							double pixThresdub3=pixThresdub*100;
-							
-							posipersent3 = posipersent3*100;
-							posipersent3 = Math.round(posipersent3);
-							posipersent2 = posipersent3 /100;
-						
-							pixThresdub3 = pixThresdub3*100;
-							pixThresdub3 = Math.round(pixThresdub3);
-							pixThresdub2 = pixThresdub3 /100;
-							
-							if(logon==true && logNan==true)// sort by name
-								IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
-							
-							String title="";
-							if(NumberSTint==0){
-								String numstr = getZeroFilledNumString(posipersent2, 3, 2);
-								title = (labelmethod==0 || labelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
-							}
-							else if(NumberSTint==1){
-								String posiST=getZeroFilledNumString(posi, 4);
-								title = (labelmethod==0 || labelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
-							}
-							srlabels.add(title);
-							srdict.put(title, new SearchResult(title, islice, loffset, impxs, colocs, null, null));
-							
-							posislice=posislice+1;
-						}//if(posipersent>pixThresdub){
-					
-					}//for (int islice=1; islice<=slicenumber ; islice++){
-					f.close();
-					
-				} else {
-					String dirtmp = vst.getDirectory();
-					if (dirtmp.length()>0 && !(dirtmp.endsWith(Prefs.separator)||dirtmp.endsWith("/")))
-						dirtmp += Prefs.separator;
-					final String directory = dirtmp;
-					final long size = width*height*3;
-					final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
-					for (int ithread = 0; ithread < threadNum; ithread++) {
-						final int ftid = ithread;
-						tasks.add(new Callable<ArrayList<SearchResult>>() {
-							public ArrayList<SearchResult> call() {
-								ArrayList<SearchResult> out = new ArrayList<SearchResult>();
-								for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < fslicenum/fthreadnum; slice++, count++) {
-									byte [] impxs = new byte[(int)size];
-									byte [] colocs = null;
-									if (fShowCo) colocs = new byte[(int)size];
-									String datapath = directory + vst.getFileName(slice);
+		final int fslicenum = slicenumber;
+		final int fthreadnum = threadNum;
+		final boolean fShowCo = ShowCo;
+		final boolean flogon = logon;
+		final boolean flogNan = logNan;
+		final int fNumberSTint = NumberSTint;
+		final int flabelmethod = labelmethod;
+		if (st3.isVirtual()) {
+			final VirtualStack vst = (VirtualStack)st3;
+			if (vst.getDirectory() == null) {
+				IJ.log("Virtual Stack (stack)");
+				
+				final FileInfo fi = idata.getOriginalFileInfo();
+				if (fi.directory.length()>0 && !(fi.directory.endsWith(Prefs.separator)||fi.directory.endsWith("/")))
+					fi.directory += Prefs.separator;
+				final String datapath = fi.directory + fi.fileName;
+				final long size = fi.width*fi.height*fi.getBytesPerPixel();
 									
-									try {
-										RandomAccessFile f = new RandomAccessFile(datapath, "r");
-										TiffDecoder tfd = new TiffDecoder(directory, vst.getFileName(slice));
-										if (tfd == null) continue;
-										FileInfo[] fi_list = tfd.getTiffInfo();
-										if (fi_list == null) continue;
-										long loffset = fi_list[0].getOffset();
-										
-										f.seek(loffset+(long)maskpos_st);
-										f.read(impxs, maskpos_st, stripsize);
-										
-										String linename = st3.getSliceLabel(slice);
-										
-										ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
-										
-										int posi = res.matchingPixNum;
-										double posipersent = res.matchingPct;
-										
-										if(posipersent<=pixThresdub){
-											if (flogon==true && flogNan==true)
-												IJ.log("NaN");
-										}else if(posipersent>pixThresdub){
-											double posipersent3=posipersent*100;
-											double pixThresdub3=pixThresdub*100;
-										
-											posipersent3 = posipersent3*100;
-											posipersent3 = Math.round(posipersent3);
-											double posipersent2 = posipersent3 /100;
-										
-											pixThresdub3 = pixThresdub3*100;
-											pixThresdub3 = Math.round(pixThresdub3);
-											
-											if(flogon==true && flogNan==true)// sort by name
-												IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
-											
-											String title="";
-											if(fNumberSTint==0){
-												String numstr = getZeroFilledNumString(posipersent2, 3, 2);
-												title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
-											}
-											else if(fNumberSTint==1) {
-												String posiST=getZeroFilledNumString(posi, 4);
-												title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
-											}
-											out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
-										}
-										f.close();
-									} catch (IOException e) {
-										continue;
-									}
-								}
-								return out;
-							}
-						});
-					}
-					try {
-						List<Future<ArrayList<SearchResult>>> taskResults = m_executor.invokeAll(tasks);
-						for (Future<ArrayList<SearchResult>> future : taskResults) {
-							for (SearchResult r : future.get()) {
-								srlabels.add(r.m_name);
-								srdict.put(r.m_name, r);
-								
-								posislice=posislice+1;
-							}
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-					/*					
-					for (int islice=1; islice<=slicenumber ; islice++){
-						if(IJ.escapePressed())
-							break;
-						byte [] impxs = new byte[(int)size];
-						byte [] colocs = null;
-						if (ShowCo) colocs = new byte[(int)size];
-						String datapath = directory + vst.getFileName(islice);
-
-						try {
-							RandomAccessFile f = new RandomAccessFile(datapath, "r");
-							TiffDecoder tfd = new TiffDecoder(directory, vst.getFileName(islice));
-							if (tfd == null) continue;
-							FileInfo[] fi_list = tfd.getTiffInfo();
-							if (fi_list == null) continue;
-							long loffset = fi_list[0].getOffset();
-	
-							f.seek(loffset+(long)maskpos_st);
-							f.read(impxs, maskpos_st, stripsize);
-							
-							IJ.showStatus("Color MIP Mask_search; "+posislice+" / positive slices");
-							IJ.showProgress((double)islice/(double)slicenumber);
-							
-							linename=st3.getSliceLabel(islice);
-							
-							ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
-							
-							int posi = res.matchingPixNum;
-							double posipersent = res.matchingPct;
-
-							if(posipersent<=pixThresdub){
-								if (logon==true && logNan==true)
-								IJ.log("NaN");
-							}else if(posipersent>pixThresdub){
-								double posipersent3=posipersent*100;
-								double pixThresdub3=pixThresdub*100;
-								
-								posipersent3 = posipersent3*100;
-								posipersent3 = Math.round(posipersent3);
-								posipersent2 = posipersent3 /100;
-							
-								pixThresdub3 = pixThresdub3*100;
-								pixThresdub3 = Math.round(pixThresdub3);
-								pixThresdub2 = pixThresdub3 /100;
-							
-								if(logon==true && logNan==true)// sort by name
-									IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
-								
-								String title="";
-								if(NumberSTint==0){
-									String numstr = getZeroFilledNumString(posipersent2, 3, 2);
-									title = (labelmethod==0 || labelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
-								}
-								else if(NumberSTint==1){
-									String posiST=getZeroFilledNumString(posi, 4);
-									title = (labelmethod==0 || labelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
-								}
-								srlabels.add(title);
-								srdict.put(title, new SearchResult(title, islice, loffset, impxs, colocs, null, null));
-								
-								posislice=posislice+1;
-							}//if(posipersent>pixThresdub){
-							f.close();
-						} catch (IOException e) {
-							continue;
-						}
-					}//for (int islice=1; islice<=slicenumber ; islice++){
-					*/
-				}
-		
-			} else {
 				final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
 				for (int ithread = 0; ithread < threadNum; ithread++) {
 					final int ftid = ithread;
+					final int f_th_snum = fslicenum/fthreadnum;
 					tasks.add(new Callable<ArrayList<SearchResult>>() {
 						public ArrayList<SearchResult> call() {
 							ArrayList<SearchResult> out = new ArrayList<SearchResult>();
-							for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < fslicenum/fthreadnum; slice++, count++) {
-								ColorProcessor ipnew = null;
-								if (fShowCo) ipnew = new ColorProcessor(width, height);
+							RandomAccessFile f = null;
+							try {
+								f = new RandomAccessFile(datapath, "r");
+								for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+									byte [] impxs = new byte[(int)size];
+									byte [] colocs = null;
+									if (fShowCo) colocs = new byte[(int)size];
+									
+									if (ftid == 0)
+										IJ.showProgress((double)slice/(double)f_th_snum);
+
+									long loffset = fi.getOffset() + (slice-1)*(size+fi.gapBetweenImages) + maskpos_st;
+									f.seek(loffset);
+									f.read(impxs, maskpos_st, stripsize);
+									
+									linename=st3.getSliceLabel(slice);
+									
+									ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
+									
+									int posi = res.matchingPixNum;
+									double posipersent = res.matchingPct;
+									
+									if(posipersent<=pixThresdub){
+										if (flogon==true && flogNan==true)
+											IJ.log("NaN");
+									}else if(posipersent>pixThresdub){
+										loffset = fi.getOffset() + (slice-1)*(size+fi.gapBetweenImages);
+																
+										double posipersent3=posipersent*100;
+										double pixThresdub3=pixThresdub*100;
+									
+										posipersent3 = posipersent3*100;
+										posipersent3 = Math.round(posipersent3);
+										double posipersent2 = posipersent3 /100;
 								
-								ImageProcessor ip3 = st3.getProcessor(slice);
-								String linename = st3.getSliceLabel(slice);
-								
-								ColorMIPMaskCompare.Output res = cc.runSearch(ip3, ipnew);
+										pixThresdub3 = pixThresdub3*100;
+										pixThresdub3 = Math.round(pixThresdub3);
+									
+										if(flogon==true && flogNan==true)// sort by name
+											IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+									
+										String title="";
+										if(fNumberSTint==0){
+											String numstr = getZeroFilledNumString(posipersent2, 3, 2);
+											title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+										}
+										else if(fNumberSTint==1){
+											String posiST=getZeroFilledNumString(posi, 4);
+											title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
+										}
+										out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
+									
+									}
+								}
+								f.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							} finally {
+								try { if (f != null) f.close(); }
+								catch  (IOException e) { e.printStackTrace(); }
+							}
+							return out;
+						}
+					});
+				}
+				try {
+					List<Future<ArrayList<SearchResult>>> taskResults = m_executor.invokeAll(tasks);
+					for (Future<ArrayList<SearchResult>> future : taskResults) {
+						for (SearchResult r : future.get()) {
+							srlabels.add(r.m_name);
+							srdict.put(r.m_name, r);
 							
-								int posi = res.matchingPixNum;
-								double posipersent = res.matchingPct;
+							posislice=posislice+1;
+						}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
+			} else {
+				IJ.log("Virtual Stack (directory)");
+				
+				String dirtmp = vst.getDirectory();
+				if (dirtmp.length()>0 && !(dirtmp.endsWith(Prefs.separator)||dirtmp.endsWith("/")))
+					dirtmp += Prefs.separator;
+				final String directory = dirtmp;
+				final long size = width*height*3;
+				final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
+				for (int ithread = 0; ithread < threadNum; ithread++) {
+					final int ftid = ithread;
+					final int f_th_snum = fslicenum/fthreadnum;
+					tasks.add(new Callable<ArrayList<SearchResult>>() {
+						public ArrayList<SearchResult> call() {
+							ArrayList<SearchResult> out = new ArrayList<SearchResult>();
+							for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+								byte [] impxs = new byte[(int)size];
+								byte [] colocs = null;
+								if (fShowCo) colocs = new byte[(int)size];
+								String datapath = directory + vst.getFileName(slice);
 								
-								if(posipersent<=pixThresdub){
-									if (flogon==true && flogNan==true)
-									IJ.log("NaN");
-								}else if(posipersent>pixThresdub){
-									double posipersent3=posipersent*100;
-									double pixThresdub3=pixThresdub*100;
+								if (ftid == 0)
+									IJ.showProgress((double)slice/(double)f_th_snum);
+								
+								try {
+									RandomAccessFile f = new RandomAccessFile(datapath, "r");
+									TiffDecoder tfd = new TiffDecoder(directory, vst.getFileName(slice));
+									if (tfd == null) continue;
+									FileInfo[] fi_list = tfd.getTiffInfo();
+									if (fi_list == null) continue;
+									long loffset = fi_list[0].getOffset();
 									
-									posipersent3 = posipersent3*100;
-									posipersent3 = Math.round(posipersent3);
-									double posipersent2 = posipersent3 /100;
+									f.seek(loffset+(long)maskpos_st);
+									f.read(impxs, maskpos_st, stripsize);
 									
-									pixThresdub3 = pixThresdub3*100;
-									pixThresdub3 = Math.round(pixThresdub3);
+									String linename = st3.getSliceLabel(slice);
 									
-									if(flogon==true && flogNan==true)// sort by name
-										IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+									ColorMIPMaskCompare.Output res = cc.runSearch(impxs, colocs);
 									
-									String title="";
-									if(fNumberSTint==0){
-										String numstr = getZeroFilledNumString(posipersent2, 3, 2);
-										title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+									int posi = res.matchingPixNum;
+									double posipersent = res.matchingPct;
+									
+									if(posipersent<=pixThresdub){
+										if (flogon==true && flogNan==true)
+											IJ.log("NaN");
+									}else if(posipersent>pixThresdub){
+										double posipersent3=posipersent*100;
+										double pixThresdub3=pixThresdub*100;
+									
+										posipersent3 = posipersent3*100;
+										posipersent3 = Math.round(posipersent3);
+										double posipersent2 = posipersent3 /100;
+									
+										pixThresdub3 = pixThresdub3*100;
+										pixThresdub3 = Math.round(pixThresdub3);
+										
+										if(flogon==true && flogNan==true)// sort by name
+											IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+										
+										String title="";
+										if(fNumberSTint==0){
+											String numstr = getZeroFilledNumString(posipersent2, 3, 2);
+											title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+										}
+										else if(fNumberSTint==1) {
+											String posiST=getZeroFilledNumString(posi, 4);
+											title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
+										}
+										out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
 									}
-									else if(fNumberSTint==1) {
-										String posiST=getZeroFilledNumString(posi, 4);
-										title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
-									}
-									out.add(new SearchResult(title, slice, 0L, null, null, ip3, ipnew));
+									f.close();
+								} catch (IOException e) {
+									continue;
 								}
 							}
 							return out;
@@ -685,64 +581,78 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
-				/*
-				for (int islice=1; islice<=slicenumber ; islice++){
-					if(IJ.escapePressed())
-						break;
-		
-					IJ.showStatus("Color MIP Mask_search; "+posislice+" / positive slices");
-					IJ.showProgress((double)islice/(double)slicenumber);
-					
-					ColorProcessor ipnew = null;
-					if (ShowCo) ipnew = new ColorProcessor(width, height);
-					
-					ip3 = st3.getProcessor(islice);// data
-					linename=st3.getSliceLabel(islice);
-
-					ColorMIPMaskCompare.Output res = cc.runSearch(ip3, ipnew);
-					
-					int posi = res.matchingPixNum;
-					double posipersent = res.matchingPct;
-
-					if(posipersent<=pixThresdub){
-						if (logon==true && logNan==true)
-						IJ.log("NaN");
-					}else if(posipersent>pixThresdub){
-						double posipersent3=posipersent*100;
-						double pixThresdub3=pixThresdub*100;
+			}
+	
+		} else {
+			final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
+			for (int ithread = 0; ithread < threadNum; ithread++) {
+				final int ftid = ithread;
+				final int f_th_snum = fslicenum/fthreadnum;
+				tasks.add(new Callable<ArrayList<SearchResult>>() {
+					public ArrayList<SearchResult> call() {
+						ArrayList<SearchResult> out = new ArrayList<SearchResult>();
+						for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+							if (ftid == 0)
+								IJ.showProgress((double)slice/(double)f_th_snum);
+							
+							ColorProcessor ipnew = null;
+							if (fShowCo) ipnew = new ColorProcessor(width, height);
+							
+							ImageProcessor ip3 = st3.getProcessor(slice);
+							String linename = st3.getSliceLabel(slice);
+							
+							ColorMIPMaskCompare.Output res = cc.runSearch(ip3, ipnew);
 						
-						posipersent3 = posipersent3*100;
-						posipersent3 = Math.round(posipersent3);
-						posipersent2 = posipersent3 /100;
-						
-						pixThresdub3 = pixThresdub3*100;
-						pixThresdub3 = Math.round(pixThresdub3);
-						pixThresdub2 = pixThresdub3 /100;
-						
-						if(logon==true && logNan==true)// sort by name
-						IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
-						
-						String title="";
-						if(NumberSTint==0){
-							String numstr = getZeroFilledNumString(posipersent2, 3, 2);
-							title = (labelmethod==0 || labelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+							int posi = res.matchingPixNum;
+							double posipersent = res.matchingPct;
+							
+							if(posipersent<=pixThresdub){
+								if (flogon==true && flogNan==true)
+								IJ.log("NaN");
+							}else if(posipersent>pixThresdub){
+								double posipersent3=posipersent*100;
+								double pixThresdub3=pixThresdub*100;
+								
+								posipersent3 = posipersent3*100;
+								posipersent3 = Math.round(posipersent3);
+								double posipersent2 = posipersent3 /100;
+								
+								pixThresdub3 = pixThresdub3*100;
+								pixThresdub3 = Math.round(pixThresdub3);
+								
+								if(flogon==true && flogNan==true)// sort by name
+									IJ.log("Positive linename; 	"+linename+" 	"+String.valueOf(posipersent2));
+								
+								String title="";
+								if(fNumberSTint==0){
+									String numstr = getZeroFilledNumString(posipersent2, 3, 2);
+									title = (flabelmethod==0 || flabelmethod==1) ? numstr+"_"+linename : linename+"_"+numstr;
+								}
+								else if(fNumberSTint==1) {
+									String posiST=getZeroFilledNumString(posi, 4);
+									title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
+								}
+								out.add(new SearchResult(title, slice, 0L, null, null, ip3, ipnew));
+							}
 						}
-						else if(NumberSTint==1) {
-							String posiST=getZeroFilledNumString(posi, 4);
-							title = (labelmethod==0 || labelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
-						}
-						srlabels.add(title);
-						srdict.put(title, new SearchResult(title, islice, 0L, null, null, ip3, ipnew));
+						return out;
+					}
+				});
+			}
+			try {
+				List<Future<ArrayList<SearchResult>>> taskResults = m_executor.invokeAll(tasks);
+				for (Future<ArrayList<SearchResult>> future : taskResults) {
+					for (SearchResult r : future.get()) {
+						srlabels.add(r.m_name);
+						srdict.put(r.m_name, r);
 						
 						posislice=posislice+1;
-					}//if(posipersent>pixThresdub){
-					
-				}//for (int islice=1; islice<=slicenumber ; islice++){
-				*/
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch(IOException e) {
-			e.printStackTrace();
-		}	
+		}
 		
 		IJ.log(" positive slice No.;"+String.valueOf(posislice));
 		
