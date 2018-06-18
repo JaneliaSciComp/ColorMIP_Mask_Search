@@ -140,7 +140,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		int labelmethod=(int)Prefs.get("labelmethod.int",0);
 		boolean DUPlogon=(boolean)Prefs.get("DUPlogon.boolean",false);
 		boolean GCON=(boolean)Prefs.get("GCON.boolean",false);
-		boolean ShowCo=(boolean)Prefs.get("ShowCo.boolean",true);
+		boolean ShowCo=(boolean)Prefs.get("ShowCo.boolean",false);
 		int NumberSTint=(int)Prefs.get("NumberSTint.int",0);
 		int threadNum=(int)Prefs.get("threadNum.int",8);
 		
