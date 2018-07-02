@@ -6,7 +6,8 @@ multiDSLT=1;// 1 is multi step DSLT for better thresholding sensitivity
 measurement="No";// Yes will measure the shape of signals (for nc82 shape database creation)
 printskip=0; // 1 will print out skipped file name
 JFRCpath=0;
-VncMaskpath=0;
+VncMaskpathF=0;
+VncMaskpathM=0;
 setBatchMode(true);
 compCC=0;// 1 is compressed nrrd, 0 is not compressed nrrd
 keepsubst=0; // 1 is keeoing sub folder structures
@@ -142,7 +143,7 @@ if(exi==1){
 		}else if(swi==22 && swi<=testline){
 			JFRCpath = String.buffer;
 		}else if(swi==23 && swi<=testline){
-			VncMaskpath = String.buffer;
+			VncMaskpathF = String.buffer;
 		}else if(swi==24 && swi<=testline){
 			JFRC3Dpath = String.buffer;
 		}else if(swi==25 && swi<=testline){
@@ -153,6 +154,8 @@ if(exi==1){
 			SkipDuplication = String.buffer;
 		}else if(swi==28 && swi<=testline){
 			tempMaskDir = String.buffer;
+		}else if(swi==29 && swi<=testline){
+			VncMaskpathM = String.buffer;
 		}  //swi==0 //swi==0
 	}
 	
@@ -353,10 +356,15 @@ for (i=startn; i<endn; i++){
 		print("JFRCpath; "+JFRCpath);
 		
 		
-		FilePathArray=newArray(VncMaskpath, "Mask_VNC_Female.tif","DontOpen",tempMaskDir);
+		FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","DontOpen",tempMaskDir);
 		fileOpen(FilePathArray);
-		VncMaskpath=FilePathArray[0];
-		print("VncMaskpath; "+VncMaskpath);
+		VncMaskpathF=FilePathArray[0];
+		print("VncMaskpathF; "+VncMaskpathF);
+		
+		FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","DontOpen",tempMaskDir);
+		fileOpen(FilePathArray);
+		VncMaskpathM=FilePathArray[0];
+		print("VncMaskpathM; "+VncMaskpathM);
 		
 		//	setBatchMode(false);
 		//		updateDisplay();
@@ -372,8 +380,8 @@ for (i=startn; i<endn; i++){
 		tempMaskDir=FilePathArray[3];
 		print("JFRC3Dpath; "+JFRC3Dpath);
 		
-		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpath+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir, filepath);
-	}
+		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM, filepath);
+	}//if(i==startn){
 	
 	countFile=countFile+1;
 	
@@ -407,7 +415,7 @@ for (i=startn; i<endn; i++){
 	if(UseSubfolderName!=false && UseSubfolderName!=true)
 	UseSubfolderName=false;
 	
-	mipbatch=newArray(list[i], path, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+	mipbatch=newArray(list[i], path, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
 	//	mipbatch[0]=list[i]; mipbatch[1]=path; mipbatch[2]=UseSubfolderName; mipbatch[3]=dirCOLOR; mipbatch[4]=endn; 
 	//	mipbatch[5]=i; mipbatch[6]=dir; mipbatch[7]=; mipbatch[8]=; mipbatch[9]=;
 	
@@ -446,7 +454,7 @@ for (i=startn; i<endn; i++){
 									
 									for (iiiii=0; iiiii<listsub4.length; iiiii++){
 										path5 = path4+listsub4[iiiii];
-										mipbatch=newArray(listsub4[iiiii], path5, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime,firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi], AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+										mipbatch=newArray(listsub4[iiiii], path5, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime,firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi], AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
 										mipfunction(mipbatch);
 										firsttime=mipbatch[8];
 										firsttime1ch=mipbatch[9];
@@ -464,11 +472,11 @@ for (i=startn; i<endn; i++){
 										perimLM[arrayi]=mipbatch[30];
 										defaultNoCH=mipbatch[31];
 										JFRCpath=mipbatch[40];
-										VncMaskpath=mipbatch[41];
+										//	VncMaskpath=mipbatch[41];
 									}
 								}//	if (endsWith(listsub3[iiii], "/"))
 								
-								mipbatch=newArray(listsub3[iiii], path4, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+								mipbatch=newArray(listsub3[iiii], path4, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
 								mipfunction(nc82nrrd,mipbatch);
 								firsttime=mipbatch[8];
 								firsttime1ch=mipbatch[9];
@@ -486,11 +494,11 @@ for (i=startn; i<endn; i++){
 								perimLM[arrayi]=mipbatch[30];
 								defaultNoCH=mipbatch[31];
 								JFRCpath=mipbatch[40];
-								VncMaskpath=mipbatch[41];
+								//		VncMaskpath=mipbatch[41];
 							}
 						}//if (endsWith(listsub2[iii], "/")
 						
-						mipbatch=newArray(listsub2[iii], path3, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+						mipbatch=newArray(listsub2[iii], path3, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
 						mipfunction(nc82nrrd,mipbatch);
 						firsttime=mipbatch[8];
 						firsttime1ch=mipbatch[9];
@@ -508,10 +516,10 @@ for (i=startn; i<endn; i++){
 						perimLM[arrayi]=mipbatch[30];
 						defaultNoCH=mipbatch[31];
 						JFRCpath=mipbatch[40];
-						VncMaskpath=mipbatch[41];
+						//	VncMaskpath=mipbatch[41];
 					}//for (iii=0; iii<listsub2.length; iii++)
 				}//if (endsWith(listsub[ii], "/"))
-				mipbatch=newArray(listsub[ii], path2, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity,Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpath,JFRC3Dpath,SkipDuplication);
+				mipbatch=newArray(listsub[ii], path2, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity,Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
 				mipfunction(nc82nrrd,mipbatch);
 				firsttime=mipbatch[8];
 				firsttime1ch=mipbatch[9];
@@ -529,7 +537,7 @@ for (i=startn; i<endn; i++){
 				perimLM[arrayi]=mipbatch[30];
 				defaultNoCH=mipbatch[31];
 				JFRCpath=mipbatch[40];
-				VncMaskpath=mipbatch[41];
+				//	VncMaskpath=mipbatch[41];
 			}//for (ii=0; ii<listsub.length; ii++){
 			
 		}//if(subfolder==1){
@@ -551,7 +559,7 @@ for (i=startn; i<endn; i++){
 		perimLM[arrayi]=mipbatch[30];
 		defaultNoCH=mipbatch[31];
 		JFRCpath=mipbatch[40];
-		VncMaskpath=mipbatch[41];
+		//	VncMaskpath=mipbatch[41];
 		//	print("AR"+AR[arrayi]+"arrayi; "+arrayi);
 	}
 	if(nImages>0){
@@ -624,9 +632,10 @@ function mipfunction(nc82nrrd,mipbatch) {
 	multiDSLT=mipbatch[38];
 	secondjump=mipbatch[39];
 	JFRCpath=mipbatch[40];
-	VncMaskpath=mipbatch[41];
+	VncMaskpathF=mipbatch[41];
 	JFRC3Dpath=mipbatch[42];
 	SkipDuplication=mipbatch[43];
+	VncMaskpathM=mipbatch[44];
 	
 	dotIndex = -1;
 	dotIndexAM = -1;
@@ -1374,22 +1383,31 @@ function mipfunction(nc82nrrd,mipbatch) {
 						setMinAndMax(0, Inimax);
 						run("Apply LUT");
 						
-						if(getHeight==1024 && getWidth==512){
-							FilePathArray=newArray(VncMaskpath, "Mask_VNC_Female.tif","Open",tempMaskDir);
-							fileOpen(FilePathArray);
-							
-							imageCalculator("Subtract", MIPtitle,"Mask_VNC_Female.tif");
-							
-							selectWindow("Mask_VNC_Female.tif");
-							close();
-							zerovalue=239907;
-							
-							selectWindow(MIPtitle);
-							total=0; // getHistogram is broke;
-							for(ix=0; ix<getWidth; ix++){
-								for(iy=0; iy<getHeight; iy++){
-									pxv = getPixel(ix,iy);
-									total= total+pxv;
+						if(getWidth==512){
+							if(getHeight==1024 || getHeight==1100){
+								
+								if(getHeight==1024){
+									FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","Open",tempMaskDir);
+									VNCMaskName="Mask_VNC_Female.tif";
+								}if(getHeight==1100){
+									FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","Open",tempMaskDir);
+									VNCMaskName="Mask_VNC_Male.tif";
+								}
+								fileOpen(FilePathArray);
+								
+								imageCalculator("Subtract", MIPtitle,VNCMaskName);
+								
+								selectWindow(VNCMaskName);
+								close();
+								zerovalue=239907;
+								
+								selectWindow(MIPtitle);
+								total=0; // getHistogram is broke;
+								for(ix=0; ix<getWidth; ix++){
+									for(iy=0; iy<getHeight; iy++){
+										pxv = getPixel(ix,iy);
+										total= total+pxv;
+									}
 								}
 							}
 						}else{
@@ -1411,7 +1429,8 @@ function mipfunction(nc82nrrd,mipbatch) {
 									zerovalue=zerovalue+1;
 								}
 							}//for(ix=0; ix<getWidth; ix++){
-						}
+							
+						}//if(getWidth==512){
 						
 						//		zerovalue=counts[0];
 						Inimin=round((total/((getHeight*getWidth)-zerovalue))*0.8);//239907 is female VNC size
@@ -1604,7 +1623,7 @@ function mipfunction(nc82nrrd,mipbatch) {
 				if(sigsize<30){
 					if(AutoBRV==1){
 						brightnessapplyArray = newArray(applyV,RealapplyV,sigsize,sigsizethre);
-						brightnessapply(DefMaxValue,filepath,brightnessapplyArray, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump,Inimax);
+						brightnessapply(DefMaxValue,filepath,brightnessapplyArray, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpathF,secondjump,Inimax,VncMaskpathM);
 						
 						applyV=brightnessapplyArray[0];
 						RealapplyV=brightnessapplyArray[1];
@@ -2243,7 +2262,7 @@ function stackconcatinate(){
 	run("Reverse");
 }
 
-function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpath,secondjump,Inimax){
+function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpathF,secondjump,Inimax,VncMaskpathM){
 	stacktoApply=getTitle();
 	
 	applyV = brightnessapplyArray[0];
@@ -2272,14 +2291,14 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 				if(getHeight==512 || getHeight==592){
 					if(getWidth==1024 || getWidth==1184){
 						tissue="Brain";
-						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM);
 						brightnessNeed=BackgroundMaskArray[0];
 					}
 				}else if (getHeight==1024 || getHeight==1100 ){// VNC
 					if(getWidth==512){
 						
 						tissue="VNC";
-						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd);
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM);
 						brightnessNeed=BackgroundMaskArray[0];
 					}
 				}else if(getHeight>getWidth){
@@ -2402,13 +2421,13 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		if(getHeight==512 || getHeight==592){
 			if(getWidth==1024 || getWidth==1184){
 				tissue="Brain";
-				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
 				brightnessNeed= BackgroundMaskArray[0];
 			}
 		}else if (getHeight==1024 || getHeight==1100){
 			if(getWidth==512){
 				tissue="VNC";
-				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
 				brightnessNeed= BackgroundMaskArray[0];
 			}
 		}else{//	if(getHeight==512 && getWidth==1024){
@@ -2552,7 +2571,7 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 				maxiZero=1;
 			}
 			
-			print("Avebrightness; "+brightnessNeed+"  maxi"+maxi+"   countregion; "+countregion);
+			print("Avebrightness; "+brightnessNeed+"  maxi"+maxi+"   countregion; "+countregion+"  sigsize; "+sigsize+"  MinSigSize;"+MinSigSize);
 			
 			if(brightnessNeed>40000){
 				
@@ -2579,7 +2598,7 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 					minus2=-50;
 					Orimaxi=maxi; avebrightness=0;
 					
-					while(maxi<1000 && avebrightness<2000){
+					while(maxi<500 && avebrightness<2000){
 						
 						minus2=minus2-50;
 						selectImage(MIP2);//MIP
@@ -2600,12 +2619,12 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 						if(getHeight==512 || getHeight==592){
 							if(getWidth==1024 || getWidth==1184){
 								tissue="Brain";
-								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
 							}
 						}else if (getHeight==1024 || getHeight==1100){
 							if(getWidth==512){
 								tissue="VNC";
-								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPthresholding,bitd);
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
 							}
 						}else{//	if(getHeight==512 && getWidth==1024){
 							
@@ -2777,8 +2796,8 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 			changelower=150;
 		}//if(lowthreM=="Auto-threshold")
 		
-//		if(lowerweight==0)
-//		changelower=0;
+		//		if(lowerweight==0)
+		//		changelower=0;
 		//	close();
 		selectWindow(stacktoApply);
 		selectImage(stack);
@@ -2799,9 +2818,9 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		
 		print("stack maxvalue; "+maxvalue);
 		
-	//		setBatchMode(false);
-	//				updateDisplay();
-	//		a
+		//		setBatchMode(false);
+		//				updateDisplay();
+		//		a
 		
 		changelower=round(changelower);
 		if(changelower!=0){
@@ -3231,7 +3250,7 @@ function CropOP (MIPtype,applyV,colorscale){
 	setPasteMode("Copy");
 }
 
-function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPapply,bitd){
+function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM){
 	
 	brightnessNeed=BackgroundMaskArray[0];
 	
@@ -3254,13 +3273,15 @@ function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPappl
 		if(getHeight==1024){
 			MaskName="Mask_VNC_Female.tif";
 			BrightnessAdjustMaskValue = 65535/29988;
+			openPath=VncMaskpathF;
 		}
 		
 		if(getHeight==1100){
 			MaskName="Mask_VNC_Male.tif";
 			BrightnessAdjustMaskValue = 65535/29700;
+			openPath=VncMaskpathM;
 		}
-		openPath=VncMaskpath;
+		
 	}
 	
 	print("Mask path; "+openPath);
@@ -3301,28 +3322,30 @@ function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpath,MIPappl
 			print("GAMMA 1.4 applied to 2D");
 		}
 		
-		imageCalculator("Min", MIPapply,MaskName);
-		run("Three D Ave");
-		
-		selectImage(MIPid);
-		
-		//setBatchMode(false);
-		//		updateDisplay();
-		//		a
-		
-		brightnessNeed = getTitle();
-		brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
-		brightnessNeed = round(brightnessNeed);
-		
-		brightnessNeed= round(brightnessNeed*BrightnessAdjustMaskValue);
-		
-		rename(MIPapply);
-		
-		//imageCalculator("Max", MIPapply,filename);
-		
-		
-		selectWindow(MaskName);
-		close();
+		if(MaskName!=0){
+			imageCalculator("Min", MIPapply,MaskName);
+			run("Three D Ave");
+			
+			selectImage(MIPid);
+			
+			//setBatchMode(false);
+			//		updateDisplay();
+			//		a
+			
+			brightnessNeed = getTitle();
+			brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
+			brightnessNeed = round(brightnessNeed);
+			
+			brightnessNeed= round(brightnessNeed*BrightnessAdjustMaskValue);
+			
+			rename(MIPapply);
+			
+			//imageCalculator("Max", MIPapply,filename);
+			
+			
+			selectWindow(MaskName);
+			close();
+		}//if(MaskName!=0){
 	}
 	
 	BackgroundMaskArray[0]=brightnessNeed;
@@ -3335,6 +3358,7 @@ function fileOpen(FilePathArray){
 	FilePath=FilePathArray[0];
 	MIPname=FilePathArray[1];
 	OpenorNot=FilePathArray[2];
+	tempMaskDir=FilePathArray[3];
 	
 	//	print(MIPname+"; "+FilePath);
 	if(isOpen(MIPname)){
