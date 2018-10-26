@@ -1572,6 +1572,7 @@ function mipfunction(nc82nrrd,mipbatch) {
 				//			setBatchMode(false);
 				//				updateDisplay();
 				//				a
+				applyV=1;
 				
 				if(AutoBRV==1){//to get brightness value from MIP
 					selectImage(MIP);
