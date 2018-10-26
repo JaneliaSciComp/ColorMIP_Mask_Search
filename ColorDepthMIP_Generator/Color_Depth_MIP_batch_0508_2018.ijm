@@ -63,6 +63,7 @@ CropYN=false;
 JFRC3Dpath=0;
 nc82nrrd=true;
 tempMaskDir=0;
+unsharp2=0;
 
 if(exi==1){
 	s1 = File.openAsRawString(filepath);
@@ -156,6 +157,8 @@ if(exi==1){
 			tempMaskDir = String.buffer;
 		}else if(swi==29 && swi<=testline){
 			VncMaskpathM = String.buffer;
+		}else if(swi==29 && swi<=testline){
+			unsharp2 = String.buffer;
 		}  //swi==0 //swi==0
 	}
 	
@@ -184,6 +187,8 @@ Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
 if(JaneliaVersion==1)
 Dialog.addCheckbox("MIP craetion from all .nrrd", nc82nrrd);
 Dialog.addCheckbox("Skip MIP creation for already made in the save directory", SkipDuplication);
+
+Dialog.addCheckbox("Skeleton MIP", unsharp2);
 
 if(JaneliaVersion==1){
 	itemFilter=newArray("NA", "Unsharp", "Max");
@@ -223,6 +228,8 @@ if(JaneliaVersion==1)
 nc82nrrd=Dialog.getCheckbox();
 SkipDuplication=Dialog.getCheckbox();
 
+unsharp2=Dialog.getCheckbox();
+
 if(JaneliaVersion==1){
 	unsharp= Dialog.getRadioButton();
 	manualST= Dialog.getRadioButton();//manually neuron channel set only for 1 st time
@@ -242,6 +249,8 @@ blockON=false;
 lowthreM="Peak Histogram";
 savestring="Choose directory";
 
+if(unsharp2==true)
+unsharp="Max";
 
 manual=0;
 if(manualST=="Manual setting 1st time only")
@@ -380,7 +389,7 @@ for (i=startn; i<endn; i++){
 		tempMaskDir=FilePathArray[3];
 		print("JFRC3Dpath; "+JFRC3Dpath);
 		
-		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM, filepath);
+		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM+"\n"+unsharp2, filepath);
 	}//if(i==startn){
 	
 	countFile=countFile+1;
@@ -1286,6 +1295,7 @@ function mipfunction(nc82nrrd,mipbatch) {
 						bitd=8;
 						unsharp="Max";//"NA", "Unsharp", "Max"
 						DefMaxValue=1;
+						AutoBRV=0;
 					}
 					
 					if(bitd==24)
