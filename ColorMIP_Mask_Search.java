@@ -369,7 +369,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 		double posipersent2 = 0;
 		double pixThresdub2 = 0;
 		
-		ColorMIPMaskCompare cc = new ColorMIPMaskCompare (ip1, Thresm, mirror_mask, nip1, NegThresm, mirror_negmask, Thres, pixfludub, xyshift);
+		final ColorMIPMaskCompare cc = new ColorMIPMaskCompare (ip1, Thresm, mirror_mask, nip1, NegThresm, mirror_negmask, Thres, pixfludub, xyshift);
 		m_executor = Executors.newFixedThreadPool(threadNum);
 		
 		final int maskpos_st = cc.getMaskStartPos()*3;
@@ -461,7 +461,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 											title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
 										}
 										out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
-									
+										if (ftid == 0)
+											IJ.showStatus("Number of Hits (estimated): "+out.size()*fthreadnum);
 									}
 								}
 								f.close();
@@ -558,6 +559,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 											title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
 										}
 										out.add(new SearchResult(title, slice, loffset, impxs, colocs, null, null));
+										if (ftid == 0)
+											IJ.showStatus("Number of Hits (estimated): "+out.size()*fthreadnum);
 									}
 									f.close();
 								} catch (IOException e) {
@@ -633,6 +636,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 									title = (flabelmethod==0 || flabelmethod==1) ? posiST+"_"+linename : linename+"_"+posiST;
 								}
 								out.add(new SearchResult(title, slice, 0L, null, null, ip3, ipnew));
+								if (ftid == 0)
+									IJ.showStatus("Number of Hits (estimated): "+out.size()*fthreadnum);
 							}
 						}
 						return out;
@@ -654,6 +659,7 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 			}
 		}
 		
+		IJ.showStatus("Number of Hits: "+String.valueOf(posislice));
 		IJ.log(" positive slice No.;"+String.valueOf(posislice));
 		
 		int PositiveSlices=posislice;
