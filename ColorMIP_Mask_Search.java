@@ -414,6 +414,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 							try {
 								f = new RandomAccessFile(datapath, "r");
 								for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+									if( IJ.escapePressed() )
+										break;
 									byte [] impxs = new byte[(int)size];
 									byte [] colocs = null;
 									if (fShowCo) colocs = new byte[(int)size];
@@ -506,6 +508,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 						public ArrayList<SearchResult> call() {
 							ArrayList<SearchResult> out = new ArrayList<SearchResult>();
 							for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+								if( IJ.escapePressed() )
+									break;
 								byte [] impxs = new byte[(int)size];
 								byte [] colocs = null;
 								if (fShowCo) colocs = new byte[(int)size];
@@ -595,6 +599,8 @@ public class ColorMIP_Mask_Search implements PlugInFilter
 					public ArrayList<SearchResult> call() {
 						ArrayList<SearchResult> out = new ArrayList<SearchResult>();
 						for (int slice = fslicenum/fthreadnum*ftid+1, count = 0; slice <= fslicenum && count < f_th_snum; slice++, count++) {
+							if( IJ.escapePressed() )
+								break;
 							if (ftid == 0)
 								IJ.showProgress((double)slice/(double)f_th_snum);
 							
