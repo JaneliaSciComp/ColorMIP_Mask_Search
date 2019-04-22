@@ -65,6 +65,7 @@ nc82nrrd=true;
 tempMaskDir=0;
 unsharp2=0;
 easyADJ=true;
+GammaON=false;
 
 if(exi==1){
 	s1 = File.openAsRawString(filepath);
@@ -162,6 +163,8 @@ if(exi==1){
 			unsharp2 = String.buffer;
 		}else if(swi==31 && swi<=testline){
 			easyADJ = String.buffer;
+		}else if(swi==32 && swi<=testline){
+			GammaON = String.buffer;
 		}  //swi==0 //swi==0
 	}
 	
@@ -183,6 +186,7 @@ Dialog.addCheckbox("Crop Optic Lobe", CropYN);
 
 Dialog.addCheckbox("Add color scale", colorscale);
 Dialog.addCheckbox("Reversed color", reverse0);
+Dialog.addCheckbox("Apply Gamma 1.4", GammaON);
 
 
 Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
@@ -223,7 +227,7 @@ CropYN=Dialog.getCheckbox();//crop
 
 colorscale=Dialog.getCheckbox();//adding color depth scale bar
 reverse0=Dialog.getCheckbox();//reverse color for front back inverted signal
-
+GammaON=Dialog.getCheckbox();
 
 expand=Dialog.getCheckbox();
 
@@ -394,7 +398,7 @@ for (i=startn; i<endn; i++){
 		tempMaskDir=FilePathArray[3];
 		print("JFRC3Dpath; "+JFRC3Dpath);
 		
-		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM+"\n"+unsharp2, filepath);
+		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM+"\n"+unsharp2+"\n"+easyADJ+"\n"+GammaON, filepath);
 	}//if(i==startn){
 	
 	countFile=countFile+1;
@@ -469,7 +473,7 @@ for (i=startn; i<endn; i++){
 									for (iiiii=0; iiiii<listsub4.length; iiiii++){
 										path5 = path4+listsub4[iiiii];
 										mipbatch=newArray(listsub4[iiiii], path5, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime,firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi], AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
-										mipfunction(nc82nrrd,mipbatch,easyADJ);
+										mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON);
 										firsttime=mipbatch[8];
 										firsttime1ch=mipbatch[9];
 										neuronimg=mipbatch[15];
@@ -491,7 +495,7 @@ for (i=startn; i<endn; i++){
 								}//	if (endsWith(listsub3[iiii], "/"))
 								
 								mipbatch=newArray(listsub3[iiii], path4, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch,AutoBRV,MIPtype,desiredmean,savemethod,CropYN,neuronimg,nc82,myDir2,myDirCLAHE,myDir2Co,myDir,usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
-								mipfunction(nc82nrrd,mipbatch,easyADJ);
+								mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON);
 								firsttime=mipbatch[8];
 								firsttime1ch=mipbatch[9];
 								neuronimg=mipbatch[15];
@@ -513,7 +517,7 @@ for (i=startn; i<endn; i++){
 						}//if (endsWith(listsub2[iii], "/")
 						
 						mipbatch=newArray(listsub2[iii], path3, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity[arrayi],Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
-						mipfunction(nc82nrrd,mipbatch,easyADJ);
+						mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON);
 						firsttime=mipbatch[8];
 						firsttime1ch=mipbatch[9];
 						neuronimg=mipbatch[15];
@@ -534,7 +538,7 @@ for (i=startn; i<endn; i++){
 					}//for (iii=0; iii<listsub2.length; iii++)
 				}//if (endsWith(listsub[ii], "/"))
 				mipbatch=newArray(listsub[ii], path2, UseSubfolderName, dirCOLOR, endn, i, dir, startn, firsttime, firsttime1ch, AutoBRV, MIPtype, desiredmean, savemethod, CropYN, neuronimg, nc82,myDir2,myDirCLAHE,myDir2Co, myDir, usingLUT,Circulicity,Roundness[arrayi],ratio[arrayi],AR[arrayi],lowerweight,lowthreM,manual,0,0,0,defaultNoCH,startMIP,endMIP,unsharp,printskip,expand,multiDSLT,secondjump,JFRCpath,VncMaskpathF,JFRC3Dpath,SkipDuplication,VncMaskpathM);
-				mipfunction(nc82nrrd,mipbatch,easyADJ);
+				mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON);
 				firsttime=mipbatch[8];
 				firsttime1ch=mipbatch[9];
 				neuronimg=mipbatch[15];
@@ -556,7 +560,7 @@ for (i=startn; i<endn; i++){
 			
 		}//if(subfolder==1){
 	}else{//	if (endsWith(list[i], "/")){
-		mipfunction(nc82nrrd,mipbatch,easyADJ);
+		mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON);
 		firsttime=mipbatch[8];
 		firsttime1ch=mipbatch[9];
 		neuronimg=mipbatch[15];
@@ -599,7 +603,7 @@ if(measurement=="Yes"){//shape measurement
 }
 
 /////////Function//////////////////////////////////////////////////////////////////
-function mipfunction(nc82nrrd,mipbatch,easyADJ) { 
+function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) { 
 	
 	KeiNrrdShrink=0;
 	GradientDim=false;
@@ -1321,9 +1325,9 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 						getMinAndMax(min, Inimax);
 						close();
 						
-						if(min!=0 && Inimax!=255){
+						if(Inimax!=255){
 							selectWindow(stackSt);
-							setMinAndMax(min, Inimax);
+							setMinAndMax(0, Inimax);
 							run("Apply LUT", "stack");
 						}
 						
@@ -1399,7 +1403,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 						setMinAndMax(0, Inimax);
 						run("Apply LUT");
 						
-						
+						VNCMaskName="";
 						if(getWidth==512){
 							if(getHeight==1024 || getHeight==1100){
 								
@@ -1419,43 +1423,55 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 								zerovalue=239907;
 								
 								selectWindow(MIPtitle);
-								total=0; // getHistogram is broke;
-								for(ix=0; ix<getWidth; ix++){
-									for(iy=0; iy<getHeight; iy++){
-										pxv = getPixel(ix,iy);
-										total= total+pxv;
-									}
-								}
+							}
+						}else if(getWidth==1024){
+							if(getHeight==512){
+								FilePathArray=newArray(0, "JFRC2010_Mask.tif","Open",tempMaskDir);
+								MaskName="JFRC2010_Mask.tif";
+								fileOpen(FilePathArray);
+								
+								imageCalculator("Subtract", MIPtitle,"JFRC2010_Mask.tif");
+								
+								selectWindow("JFRC2010_Mask.tif");
+								close();
 							}
 						}else{
 							
 							setMinAndMax(0, 65535);
 							selectWindow(MIPtitle);
 							
-							makeRectangle(getWidth*0.2, getHeight*0.2, getWidth*0.6, getHeight*0.6);
+							makeRectangle(getWidth*0.1, getHeight*0.1, getWidth*0.8, getHeight*0.8);
 							setForegroundColor(0, 0, 0);
 							run("Fill", "slice");
-							
-							total=0; // getHistogram is broke;
-							for(ix=0; ix<getWidth; ix++){
-								for(iy=0; iy<getHeight; iy++){
-									pxv = getPixel(ix,iy);
-									total= total+pxv;
-									
-									if(pxv==0)
-									zerovalue=zerovalue+1;
-								}
-							}//for(ix=0; ix<getWidth; ix++){
-							
 						}//if(getWidth==512){
+						
+						total=0; // getHistogram is broke;
+						for(ix=0; ix<getWidth; ix++){
+							for(iy=0; iy<getHeight; iy++){
+								pxv = getPixel(ix,iy);
+								total= total+pxv;
+								
+								if(pxv==0 && 	VNCMaskName=="")
+								zerovalue=zerovalue+1;
+							}
+						}//for(ix=0; ix<getWidth; ix++){
+						
+						
 						
 						//		zerovalue=counts[0];
 						Inimin=round((total/((getHeight*getWidth)-zerovalue))*0.8);//239907 is female VNC size
 						
 						print("Initial Bri adjustment; Inimin; "+Inimin+"   max; "+Inimax+"   RealInimax; "+RealInimax+"   DefMaxValue; "+DefMaxValue);
 						
-						selectWindow(MIPtitle);
-						close();
+						
+						//		setBatchMode(false);
+						//		updateDisplay();
+						//		a
+						
+						while(isOpen(MIPtitle)){
+							selectWindow(MIPtitle);
+							close();
+						}
 						
 						if(Inimin!=0 || Inimax!=65535){
 							selectWindow(stackSt);
@@ -1569,8 +1585,6 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 							}
 						}//	if(lowerweight>0){
 					}//if(unsharp!="Max"){
-					
-					
 					//					setBatchMode(false);
 					//					updateDisplay();
 					//					a
@@ -1643,7 +1657,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 				
 				if(sigsize<30){
 					if(AutoBRV==1){
-						brightnessapplyArray = newArray(applyV,RealapplyV,sigsize,sigsizethre);
+						brightnessapplyArray = newArray(applyV,RealapplyV,sigsize,sigsizethre,GammaON);
 						brightnessapply(DefMaxValue,filepath,brightnessapplyArray, bitd,lowerweight,lowthreM,stack,JFRCpath,VncMaskpathF,secondjump,Inimax,VncMaskpathM);
 						
 						applyV=brightnessapplyArray[0];
@@ -1682,7 +1696,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ) {
 				}
 				
 				
-				ColorCoder(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand);
+				ColorCoder(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand,GammaON);
 				
 				if(AutoBRV==1){
 					if(sigsize>9)
@@ -2301,6 +2315,7 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 	RealapplyV=brightnessapplyArray[1];
 	sigsize=brightnessapplyArray[2];
 	sigsizethre=brightnessapplyArray[3];	
+	GammaON=brightnessapplyArray[4];	
 	
 	print("brightnessapply start, RealapplyV; "+RealapplyV+"   applyV; "+applyV+"  lowerweight; "+lowerweight+"   sigsize; "+sigsize+"  sigsizethre; "+sigsizethre);
 	
@@ -2323,14 +2338,14 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 				if(getHeight==512 || getHeight==592){
 					if(getWidth==1024 || getWidth==1184){
 						tissue="Brain";
-						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM);
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM,GammaON);
 						brightnessNeed=BackgroundMaskArray[0];
 					}
 				}else if (getHeight==1024 || getHeight==1100 ){// VNC
 					if(getWidth==512){
 						
 						tissue="VNC";
-						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM);
+						BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM,GammaON);
 						brightnessNeed=BackgroundMaskArray[0];
 					}
 				}else if(getHeight>getWidth){
@@ -2453,13 +2468,13 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		if(getHeight==512 || getHeight==592){
 			if(getWidth==1024 || getWidth==1184){
 				tissue="Brain";
-				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM,GammaON);
 				brightnessNeed= BackgroundMaskArray[0];
 			}
 		}else if (getHeight==1024 || getHeight==1100){
 			if(getWidth==512){
 				tissue="VNC";
-				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
+				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM,GammaON);
 				brightnessNeed= BackgroundMaskArray[0];
 			}
 		}else{//	if(getHeight==512 && getWidth==1024){
@@ -2483,7 +2498,6 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 			
 			imageCalculator("Min", MIPthresholding,"MaskMIP.tif");
 			
-			GammaON=true;
 			//	setBatchMode(false);
 			if(GammaON==true){
 				
@@ -2651,12 +2665,12 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 						if(getHeight==512 || getHeight==592){
 							if(getWidth==1024 || getWidth==1184){
 								tissue="Brain";
-								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM,GammaON);
 							}
 						}else if (getHeight==1024 || getHeight==1100){
 							if(getWidth==512){
 								tissue="VNC";
-								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM);
+								BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM,GammaON);
 							}
 						}else{//	if(getHeight==512 && getWidth==1024){
 							
@@ -2834,6 +2848,21 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		selectWindow(stacktoApply);
 		selectImage(stack);
 		
+		
+		if(GammaON==true){
+			
+			run("Gamma ", "gamma=1.40 3d in=InMacro cpu=6");
+			gamma = getTitle();
+			
+			selectWindow(stacktoApply);
+			close();
+			
+			selectWindow(gamma);
+			rename(stacktoApply);
+			stack = getImageID();
+			print("GAMMA 1.4 applied to 3D stack");
+		}
+		
 		if(sigsize>=MinSigSize){
 			setMinAndMax(0, applyV2);//subtraction
 			run("Apply LUT", "stack");
@@ -2982,7 +3011,7 @@ function basicoperation(BasicMIP){
 	BasicMIP[1]=max;
 }
 
-function ColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand) {//"Time-Lapse Color Coder" 
+function ColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorScaleCheck, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand,GammaON) {//"Time-Lapse Color Coder" 
 	
 	if(usingLUT=="royal")
 	var Glut = "royal";	//default LUT
@@ -2994,7 +3023,7 @@ function ColorCoder(slicesOri, applyV, width, AutoBRV, bitd, CLAHE, GFrameColorS
 	
 	getDimensions(width, height, channels, slices, frames);
 	rename("Original_Stack.tif");
-	GammaON=true;
+	
 	//	setBatchMode(false);
 	if(GammaON==true){
 		
@@ -3282,7 +3311,7 @@ function CropOP (MIPtype,applyV,colorscale){
 	setPasteMode("Copy");
 }
 
-function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM){
+function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapply,bitd,VncMaskpathM,GammaON){
 	
 	brightnessNeed=BackgroundMaskArray[0];
 	
@@ -3338,7 +3367,7 @@ function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapp
 		selectWindow(MIPapply);
 		MIPid = getImageID();
 		
-		GammaON=true;
+		
 		//	setBatchMode(false);
 		if(GammaON==true){
 			
@@ -3352,27 +3381,30 @@ function BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPapp
 			rename(MIPapply);
 			MIPid = getImageID();
 			print("GAMMA 1.4 applied to 2D");
-		}
+		}//	if(GammaON==true){
 		
 		if(MaskName!=0){
 			imageCalculator("Min", MIPapply,MaskName);
-			run("Three D Ave");
+			//	run("Three D Ave");
 			
 			selectImage(MIPid);
+			selectWindow(MIPapply);
 			
-			//setBatchMode(false);
-			//		updateDisplay();
-			//		a
+			run("Mask MIP Brightness Measure", "mask="+MaskName+" data="+MIPapply+"");
+			brightnessNeed = call("Mask_MIP_Brightness_Measure.getResult");
 			
-			brightnessNeed = getTitle();
-			brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
-			brightnessNeed = round(brightnessNeed);
+			//	brightnessNeed = getTitle();
+			//		brightnessNeed= parseFloat(brightnessNeed);//Chaneg string to number
+			//		brightnessNeed = round(brightnessNeed);
 			
 			brightnessNeed= round(brightnessNeed*BrightnessAdjustMaskValue);
-			
 			rename(MIPapply);
 			
-			//imageCalculator("Max", MIPapply,filename);
+			print("brightnessNeed; 3405  "+brightnessNeed);
+			
+			//		setBatchMode(false);
+			//		updateDisplay();
+			//		a
 			
 			
 			selectWindow(MaskName);
@@ -3401,9 +3433,11 @@ function fileOpen(FilePathArray){
 		if(FilePath==0){
 			
 			FilePath=getDirectory("plugins")+MIPname;
-			
 			tempmaskEXI=File.exists(FilePath);
-			if(tempmaskEXI!=1)
+			if(tempmaskEXI!=1){
+				FilePath=tempMaskDir+MIPname;
+				tempmaskEXI=File.exists(FilePath);
+			}if(tempmaskEXI!=1)
 			FilePath=getDirectory("plugins")+"Plugins_Color_MIP"+File.separator+MIPname;
 			
 			tempmaskEXI=File.exists(FilePath);
