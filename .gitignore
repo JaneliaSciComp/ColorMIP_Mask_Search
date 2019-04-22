@@ -3,3 +3,7 @@
 .classpath
 
 .project
+
+ColorDepthMIP_Generator/Plugins_Color_MIP/Thumbs.db
+
+*.db
