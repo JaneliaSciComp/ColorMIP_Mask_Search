@@ -3454,6 +3454,11 @@ function fileOpen(FilePathArray){
 			}
 		}else{
 			tempmaskEXI=File.exists(FilePath);
+			if(tempmaskEXI!=1)
+			FilePath=tempMaskDir+MIPname;
+			
+			tempmaskEXI=File.exists(FilePath);
+			
 			if(tempmaskEXI==1){
 				if(OpenorNot!="DontOpen"){
 					open(FilePath);
