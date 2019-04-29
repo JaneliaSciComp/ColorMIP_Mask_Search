@@ -367,19 +367,19 @@ for (i=startn; i<endn; i++){
 	
 	if(i==startn){
 		
-		FilePathArray=newArray(JFRCpath, "JFRC2010_Mask.tif","DontOpen",tempMaskDir);//DontOpen
+		FilePathArray=newArray(JFRCpath, "JFRC2010_Mask.tif","DontOpen",tempMaskDir,"");//DontOpen
 		fileOpen(FilePathArray);
 		JFRCpath=FilePathArray[0];
 		tempMaskDir=FilePathArray[3];
 		print("JFRCpath; "+JFRCpath);
 		
 		
-		FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","DontOpen",tempMaskDir);
+		FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","DontOpen",tempMaskDir,"");
 		fileOpen(FilePathArray);
 		VncMaskpathF=FilePathArray[0];
 		print("VncMaskpathF; "+VncMaskpathF);
 		
-		FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","DontOpen",tempMaskDir);
+		FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","DontOpen",tempMaskDir,"");
 		fileOpen(FilePathArray);
 		VncMaskpathM=FilePathArray[0];
 		print("VncMaskpathM; "+VncMaskpathM);
@@ -392,7 +392,7 @@ for (i=startn; i<endn; i++){
 		if(TDext==1)
 		JFRC3Dpath=tempMaskDir;
 		
-		FilePathArray=newArray(JFRC3Dpath, "JFRC2010_3D_Mask.nrrd","DontOpen",tempMaskDir);
+		FilePathArray=newArray(JFRC3Dpath, "JFRC2010_3D_Mask.nrrd","DontOpen",tempMaskDir,"");
 		fileOpen(FilePathArray);
 		JFRC3Dpath=FilePathArray[0];
 		tempMaskDir=FilePathArray[3];
@@ -1408,32 +1408,23 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 							if(getHeight==1024 || getHeight==1100){
 								
 								if(getHeight==1024){
-									FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","Open",tempMaskDir);
+									FilePathArray=newArray(VncMaskpathF, "Mask_VNC_Female.tif","Open",tempMaskDir,MIPtitle);
 									VNCMaskName="Mask_VNC_Female.tif";
 								}if(getHeight==1100){
-									FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","Open",tempMaskDir);
+									FilePathArray=newArray(VncMaskpathM, "Mask_VNC_Male.tif","Open",tempMaskDir,MIPtitle);
 									VNCMaskName="Mask_VNC_Male.tif";
 								}
 								fileOpen(FilePathArray);
-								
-								imageCalculator("Subtract", MIPtitle,VNCMaskName);
-								
-								selectWindow(VNCMaskName);
-								close();
+									
 								zerovalue=239907;
 								
 								selectWindow(MIPtitle);
 							}
 						}else if(getWidth==1024){
 							if(getHeight==512){
-								FilePathArray=newArray(0, "JFRC2010_Mask.tif","Open",tempMaskDir);
+								FilePathArray=newArray(0, "JFRC2010_Mask.tif","Open",tempMaskDir,MIPtitle);
 								MaskName="JFRC2010_Mask.tif";
 								fileOpen(FilePathArray);
-								
-								imageCalculator("Subtract", MIPtitle,"JFRC2010_Mask.tif");
-								
-								selectWindow("JFRC2010_Mask.tif");
-								close();
 							}
 						}else{
 							
@@ -3423,6 +3414,7 @@ function fileOpen(FilePathArray){
 	MIPname=FilePathArray[1];
 	OpenorNot=FilePathArray[2];
 	tempMaskDir=FilePathArray[3];
+	MIPtitle=FilePathArray[4];
 	
 	//	print(MIPname+"; "+FilePath);
 	if(isOpen(MIPname)){
@@ -3472,6 +3464,15 @@ function fileOpen(FilePathArray){
 			}
 		}
 	}//if(isOpen("JFRC2013_63x_Tanya.nrrd")){
+	
+	if(OpenorNot=="Open"){
+		imageCalculator("Subtract", MIPtitle,MIPname);
+		
+		while(isOpen(MIPname)){
+			selectWindow(MIPname);
+			close();
+		}
+	}
 	
 	FilePathArray[0]=FilePath;
 	FilePathArray[3]=tempMaskDir;
