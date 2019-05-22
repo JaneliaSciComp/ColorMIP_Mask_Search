@@ -5,7 +5,7 @@ FIJI plugins created by Hideo Otsuna and Takashi Kawase.
 
 ## Before starting
  1. Copy "Plugins_Color_MIP" folder into Fiji/Plugins/ folder (please do not change the folder name, the name of folder is using as a link to the contents of .tiff/nrrd files).
- 2. Copy "Color_Depth_MIP_batch_0508_2018.ijm" into Fiji/Plugins/Macros/ folder.
+ 2. Copy "Color_Depth_MIP_batch_0315_2019.ijm" into Fiji/Plugins/Macros/ folder.
  3. Copy "PsychedelicRainBow2.lut" into Fiji/luts/ folder.
 
 
