@@ -7,7 +7,7 @@ This manual is modified based on the instruction developed by Justine X Chia (UC
 ## Before starting
  1. Launch and update FIJI.
  2. Drag and drop `ColorMIP_Mask_Search.jar` on FIJI then quit (the plugin installation).  
- (you can get the .jar file from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/blob/master/ColorMIP_Mask_Search.jar)) 
+ (you can get the .jar file from [here](https://github.com/JaneliaSciComp/ColorMIP_Mask_Search/blob/master/Color_MIP_Mask_Search.jar)) 
 
 ## Startup
 Drag the folder (containing Gal4 color depth MIPs) into fiji, use virtual stack option. 
