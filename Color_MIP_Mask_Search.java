@@ -401,6 +401,21 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		start = System.currentTimeMillis();
 		
 		//IJ.log(" masksize;"+String.valueOf(masksize));
+		String fileformat="tif";
+		if(st3.isVirtual()){
+			VirtualStack vst = (VirtualStack)st3;
+			String dirtmp = vst.getDirectory();
+			if (dirtmp.length()>0 && !(dirtmp.endsWith(Prefs.separator)||dirtmp.endsWith("/")))
+			dirtmp += Prefs.separator;
+			String directory = dirtmp;
+			String datapath = directory + vst.getFileName(10);
+			
+			int tifextindex=datapath.lastIndexOf(".tif");
+			int pngextindex=datapath.lastIndexOf(".png");
+			
+			if(pngextindex!=-1 && tifextindex==-1)
+			fileformat="png";
+		}
 		
 		ArrayList<String> srlabels = new ArrayList<String>();
 		ArrayList<String> finallbs = new ArrayList<String>();
@@ -413,7 +428,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		final boolean flogNan = logNan;
 		final int fNumberSTint = NumberSTint;
 		final int flabelmethod = labelmethod;
-		if (st3.isVirtual()) {
+		if (st3.isVirtual() && !fileformat.equals("png")) {
 			final VirtualStack vst = (VirtualStack)st3;
 			if (vst.getDirectory() == null) {
 				IJ.log("Virtual Stack (stack)");
