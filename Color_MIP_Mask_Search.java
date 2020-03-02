@@ -389,6 +389,21 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		int width = imask.getWidth();
 		int height = imask.getHeight();
 		
+		int widthD = idata.getWidth();
+		int heightD = idata.getHeight();
+		
+		if(width!=widthD){
+			IJ.showMessage ("Image size is different between the mask and data!  mask width; "+width+" px   data width; "+widthD+" px");
+			IJ.log("Image size is different between the mask and data!");
+			return;
+		}
+		
+		if(height!=heightD){
+			IJ.showMessage ("Image size is different between the mask and data!  mask height; "+height+" px   data height; "+heightD+" px");
+			IJ.log("Image size is different between the mask and data!");
+			return;
+		}
+		
 		if(IJ.escapePressed())
 		return;
 		
@@ -456,7 +471,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		final boolean flogNan = logNan;
 		final int fNumberSTint = NumberSTint;
 		final int flabelmethod = labelmethod;
-		if(fileformat.equals("tif  none")){
+		if(fileformat.equals("tif none")){
 			if (st3.isVirtual()) {
 				final VirtualStack vst = (VirtualStack)st3;
 				if (vst.getDirectory() == null) {
@@ -1324,7 +1339,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				if(slnum>maxnumberN)
 				slnum=maxnumberN;
 				
-				if(fileformat.equals("tif normal")){
+				if(fileformat.equals("tif none")){
 					if (st3.isVirtual()) {
 						VirtualStack vst = (VirtualStack)st3;
 						if (vst.getDirectory() == null) {
