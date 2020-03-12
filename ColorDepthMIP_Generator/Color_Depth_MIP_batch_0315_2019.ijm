@@ -189,7 +189,7 @@ Dialog.addCheckbox("Reversed color", reverse0);
 Dialog.addCheckbox("Apply Gamma 1.4", GammaON);
 
 
-Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
+//Dialog.addCheckbox("VNC (Expand canvas for scale-bar)", expand);
 
 if(JaneliaVersion==1)
 Dialog.addCheckbox("MIP craetion from all .nrrd", nc82nrrd);
@@ -229,7 +229,7 @@ colorscale=Dialog.getCheckbox();//adding color depth scale bar
 reverse0=Dialog.getCheckbox();//reverse color for front back inverted signal
 GammaON=Dialog.getCheckbox();
 
-expand=Dialog.getCheckbox();
+//expand=Dialog.getCheckbox();
 
 if(JaneliaVersion==1)
 nc82nrrd=Dialog.getCheckbox();
@@ -340,7 +340,7 @@ if(blockposition<=1){
 }
 
 
-myDir = 0; myDirT = 0; myDirCLAHE = 0; myDir2Co = 0;
+myDir = 0; myDirT = 0; myDirCLAHE = 0; 
 
 firsttime=0;
 firsttime1ch=0;
@@ -348,7 +348,7 @@ nc82=0;
 neuronimg=0;
 myDir2=0;
 myDirCLAHE=0;
-myDir2Co=0;
+myDir2Co=dirCOLOR;
 myDir=0;
 //if(measurement=="Yes"){
 numberGap=100000;//endn-startn+1;
@@ -1042,234 +1042,236 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 				imageNum=imageNum-1;
 			}//	if(manual==1){//if(manualST=="Manual setting 1st time only")
 			
-			if(manual==2){//	if(manual==2){ all channels mip creation
-				if(channels>1 || bitd==24)
-				run("Split Channels");
-				titlelist=getList("image.titles");
+			if(channels>1){
+				if(manual==2){//	if(manual==2){ all channels mip creation
+					if(channels>1 || bitd==24)
+					run("Split Channels");
+					titlelist=getList("image.titles");
+					
+					imageNum=titlelist.length;
+					
+					if(colorcoding==1)
+					if(savemethod==1)
+					myDir2Co = dirCOLOR;
+				}//if(manual==2){//	if(manual==2){ all channels mip creation
 				
-				imageNum=titlelist.length;
-				
-				if(colorcoding==1)
-				if(savemethod==1)
-				myDir2Co = dirCOLOR;
-			}//if(manual==2){//	if(manual==2){ all channels mip creation
-			
-			if(manual==3){// Automatic signal amount measurement & nc82 close
-				
-				run("Split Channels");
-				
-				run("Set Measurements...", "area centroid perimeter shape redirect=None decimal=2");
-				
-				sumCh=newArray(channels);
-				
-				//		for(imageN=0; imageN<channels; imageN++){
-				//			Ch[imageN]=getTitle();
-				//			run("Put Behind [tab]");
-				//			print(Ch[imageN]);
-				//		}
-				Ch=getList("image.titles");
-				
-				for(iamgen=0; iamgen<channels; iamgen++){
+				if(manual==3){// Automatic signal amount measurement & nc82 close
 					
-					selectWindow(Ch[iamgen]);
-					//	print(Ch[iamgen]);
+					run("Split Channels");
 					
-					run("Z Project...", "start=1 stop="+nSlices+" projection=[Max Intensity]");
-					run("8-bit");
-					maxP=getTitle();
+					run("Set Measurements...", "area centroid perimeter shape redirect=None decimal=2");
 					
-					//run("Histogram thresholding", "z-attenuation=1 how=2");
-					setAutoThreshold("Intermodes dark");
+					sumCh=newArray(channels);
 					
-					//	setAutoThreshold("Huang dark");
+					//		for(imageN=0; imageN<channels; imageN++){
+					//			Ch[imageN]=getTitle();
+					//			run("Put Behind [tab]");
+					//			print(Ch[imageN]);
+					//		}
+					Ch=getList("image.titles");
 					
-					//			setThreshold(0, 255);
-					
-					//Histval=getTitle();
-					//Histval=round(Histval);
-					
-					getThreshold(lower, upper);
-					setThreshold(lower, upper);
-					
-					setOption("BlackBackground", true);
-					run("Convert to Mask");
-					
-					run("Make Binary");
-					run("Analyze Particles...", "size=100.00-Infinity circularity=0.00-1.00 show=Nothing display clear");
-					maxsize=0; maxperim=0;
-					
-					for(getresult=0; getresult<nResults; getresult++){
-						areasize=getResult("Area", getresult);
-						perimL=getResult("Perim.", getresult);
+					for(iamgen=0; iamgen<channels; iamgen++){
 						
-						if(areasize>=maxsize){
-							maxsize=areasize;
-							maxperim=perimL;
-							Circulicity=getResult("Circ.", getresult);
-							Roundness=getResult("Round", getresult);
-							AR=getResult("AR", getresult);
-							areasizeM=getResult("Area", getresult);
-							perimLM=getResult("Perim.", getresult);
-							//	print("AR; "+AR);
+						selectWindow(Ch[iamgen]);
+						//	print(Ch[iamgen]);
+						
+						run("Z Project...", "start=1 stop="+nSlices+" projection=[Max Intensity]");
+						run("8-bit");
+						maxP=getTitle();
+						
+						//run("Histogram thresholding", "z-attenuation=1 how=2");
+						setAutoThreshold("Intermodes dark");
+						
+						//	setAutoThreshold("Huang dark");
+						
+						//			setThreshold(0, 255);
+						
+						//Histval=getTitle();
+						//Histval=round(Histval);
+						
+						getThreshold(lower, upper);
+						setThreshold(lower, upper);
+						
+						setOption("BlackBackground", true);
+						run("Convert to Mask");
+						
+						run("Make Binary");
+						run("Analyze Particles...", "size=100.00-Infinity circularity=0.00-1.00 show=Nothing display clear");
+						maxsize=0; maxperim=0;
+						
+						for(getresult=0; getresult<nResults; getresult++){
+							areasize=getResult("Area", getresult);
+							perimL=getResult("Perim.", getresult);
+							
+							if(areasize>=maxsize){
+								maxsize=areasize;
+								maxperim=perimL;
+								Circulicity=getResult("Circ.", getresult);
+								Roundness=getResult("Round", getresult);
+								AR=getResult("AR", getresult);
+								areasizeM=getResult("Area", getresult);
+								perimLM=getResult("Perim.", getresult);
+								//	print("AR; "+AR);
+							}
 						}
-					}
-					
-					run("Analyze Particles...", "size="+maxsize-100+"-Infinity circularity=0.00-1.00 show=Masks display clear");
-					
-					masknc82=getImageID();// opened images are original stack, "sumCh"+iamgen, masknc82
-					masknc82title=getTitle();
-					run("RGB Color");
-					run("8-bit");
-					
-					print("masknc82title; "+masknc82title+"   Slices; "+nSlices);
-					
-					//creation of rectangle = background measure
-					makeRectangle(0, 2, 100, 100);
-					getStatistics(area, mean, min, max, std, histogram);
-					
-					if(mean>200){//convert to 16bit mask
-						run("Invert LUT");
+						
+						run("Analyze Particles...", "size="+maxsize-100+"-Infinity circularity=0.00-1.00 show=Masks display clear");
+						
+						masknc82=getImageID();// opened images are original stack, "sumCh"+iamgen, masknc82
+						masknc82title=getTitle();
 						run("RGB Color");
 						run("8-bit");
-						run("16-bit");
-						run("Select All");
-						run("Mask255 to 4095");
-					}else{
-						run("Select All");
-						run("16-bit");
-						run("Mask255 to 4095");
-					}
-					
-					selectImage(maxP);
-					close();
-					
-					selectWindow(Ch[iamgen]);
-					run("Z Project...", "start=1 stop="+nSlices+" projection=[Sum Slices]");
-					
-					run("16-bit");
-					sumP=getImageID();
-					sumPST=getTitle();
-					
-					imageCalculator("AND create", ""+sumPST+"", ""+masknc82title+"");//AND operation, then measure signal amount only mask region//////////////
-					getStatistics(area, amount, min, max, std, histogram);//	Amount of signal, larger is nc82
-					close();//
-					
-					ratio=maxperim/maxsize;// smaller is nc82
-					
-					List.set("ImageSize"+iamgen, maxsize);
-					List.set("ratio"+iamgen, ratio);
-					List.set("Amount"+iamgen, amount);	//counting only signal region, not count background
-					List.set("Circulicity"+iamgen, Circulicity);
-					
-					selectImage(masknc82);
-					close();
-					
-					selectImage(sumP);
-					close();
-					
-					ChRest=getList("image.titles");
-					restNo=0;
-					while(nImages>channels){
-						selectWindow(ChRest[restNo]);
-						sampleslice=nSlices();
-						if(sampleslice==1)
+						
+						print("masknc82title; "+masknc82title+"   Slices; "+nSlices);
+						
+						//creation of rectangle = background measure
+						makeRectangle(0, 2, 100, 100);
+						getStatistics(area, mean, min, max, std, histogram);
+						
+						if(mean>200){//convert to 16bit mask
+							run("Invert LUT");
+							run("RGB Color");
+							run("8-bit");
+							run("16-bit");
+							run("Select All");
+							run("Mask255 to 4095");
+						}else{
+							run("Select All");
+							run("16-bit");
+							run("Mask255 to 4095");
+						}
+						
+						selectImage(maxP);
 						close();
 						
-						restNo=restNo+1;
-					}
-					
-					print(iamgen+";  maxsize; "+maxsize+"  ratio; "+ratio+"  amount; "+amount+"  Circulicity; "+Circulicity);
-				}//for(iamgen=0; iamgen<channels; iamgen++){
-				
-				defaultM=100; defaultsize=0; defaultamout=0; defaultcirc=0; amountgap=0; sizegap=0; nc82Amount=0; nc82Size=0; nc82Ratio=0; nc82Circu=0;
-				
-				for(chnum0=0; chnum0<channels; chnum0++){
-					ratiocomp=List.get("ratio"+chnum0);
-					sizecomp=List.get("ImageSize"+chnum0);
-					sizecomp=round(sizecomp);
-					amountcomp=List.get("Amount"+chnum0);
-					amountcomp=round(amountcomp);
-					
-					CirculicityComp=List.get("Circulicity"+chnum0);
-					
-					if(ratiocomp<defaultM){//smallest ratio is nc82
-						defaultM=ratiocomp;
-						nc82Ratio=chnum0;
-					}
-					if(sizecomp > defaultsize){//highest number= nc82
-						if(defaultsize!=0)
-						sizegap=sizecomp/defaultsize;
+						selectWindow(Ch[iamgen]);
+						run("Z Project...", "start=1 stop="+nSlices+" projection=[Sum Slices]");
 						
-						defaultsize=sizecomp;
-						nc82Size=chnum0;
-					}
-					if(amountcomp>defaultamout){//highest number= nc82
-						if(defaultamout!=0)
-						amountgap=amountcomp/defaultamout;
+						run("16-bit");
+						sumP=getImageID();
+						sumPST=getTitle();
 						
-						defaultamout=amountcomp;
-						nc82Amount=chnum0;
+						imageCalculator("AND create", ""+sumPST+"", ""+masknc82title+"");//AND operation, then measure signal amount only mask region//////////////
+						getStatistics(area, amount, min, max, std, histogram);//	Amount of signal, larger is nc82
+						close();//
+						
+						ratio=maxperim/maxsize;// smaller is nc82
+						
+						List.set("ImageSize"+iamgen, maxsize);
+						List.set("ratio"+iamgen, ratio);
+						List.set("Amount"+iamgen, amount);	//counting only signal region, not count background
+						List.set("Circulicity"+iamgen, Circulicity);
+						
+						selectImage(masknc82);
+						close();
+						
+						selectImage(sumP);
+						close();
+						
+						ChRest=getList("image.titles");
+						restNo=0;
+						while(nImages>channels){
+							selectWindow(ChRest[restNo]);
+							sampleslice=nSlices();
+							if(sampleslice==1)
+							close();
+							
+							restNo=restNo+1;
+						}
+						
+						print(iamgen+";  maxsize; "+maxsize+"  ratio; "+ratio+"  amount; "+amount+"  Circulicity; "+Circulicity);
+					}//for(iamgen=0; iamgen<channels; iamgen++){
+					
+					defaultM=100; defaultsize=0; defaultamout=0; defaultcirc=0; amountgap=0; sizegap=0; nc82Amount=0; nc82Size=0; nc82Ratio=0; nc82Circu=0;
+					
+					for(chnum0=0; chnum0<channels; chnum0++){
+						ratiocomp=List.get("ratio"+chnum0);
+						sizecomp=List.get("ImageSize"+chnum0);
+						sizecomp=round(sizecomp);
+						amountcomp=List.get("Amount"+chnum0);
+						amountcomp=round(amountcomp);
+						
+						CirculicityComp=List.get("Circulicity"+chnum0);
+						
+						if(ratiocomp<defaultM){//smallest ratio is nc82
+							defaultM=ratiocomp;
+							nc82Ratio=chnum0;
+						}
+						if(sizecomp > defaultsize){//highest number= nc82
+							if(defaultsize!=0)
+							sizegap=sizecomp/defaultsize;
+							
+							defaultsize=sizecomp;
+							nc82Size=chnum0;
+						}
+						if(amountcomp>defaultamout){//highest number= nc82
+							if(defaultamout!=0)
+							amountgap=amountcomp/defaultamout;
+							
+							defaultamout=amountcomp;
+							nc82Amount=chnum0;
+						}
+						if(CirculicityComp>defaultcirc){//highest number= nc82
+							defaultcirc=CirculicityComp;
+							nc82Circu=chnum0;
+						}
+					}//for(chnum0=0; chnum0<channels; chnum0++){
+					print("nc82Amount; "+nc82Amount+"  nc82Size; "+nc82Size+"  nc82Ratio; "+nc82Ratio+"	  nc82Circu; "+nc82Circu);
+					
+					nc82Real=1000;
+					
+					if(nc82Amount==nc82Size && nc82Ratio==nc82Size && nc82Amount==nc82Ratio && nc82Circu==nc82Ratio && nc82Circu==nc82Amount){
+						nc82Real=nc82Amount;
+					}else{
+						
+						if(nc82Circu==nc82Ratio)
+						nc82Real=nc82Circu;
+						
+						else if(nc82Amount==nc82Size)
+						nc82Real=nc82Amount;
+						
+						else if(nc82Ratio==nc82Size)
+						nc82Real=nc82Ratio;
+						
+						else if(nc82Amount==nc82Ratio)
+						nc82Real=nc82Amount;
 					}
-					if(CirculicityComp>defaultcirc){//highest number= nc82
-						defaultcirc=CirculicityComp;
-						nc82Circu=chnum0;
+					if(defaultcirc<0.1){//Circulicity thresholding
+						if(nc82Circu!=nc82Real)
+						nc82Real=nc82Circu;
+						
+						if(nc82Amount==nc82Size && nc82Ratio==nc82Size && nc82Amount==nc82Ratio)
+						nc82Real=nc82Amount;
+						
+						if(sizegap>10)//if size difference is more than 10 time, bigger is nc82
+						nc82Real=nc82Size;
+						
 					}
-				}//for(chnum0=0; chnum0<channels; chnum0++){
-				print("nc82Amount; "+nc82Amount+"  nc82Size; "+nc82Size+"  nc82Ratio; "+nc82Ratio+"	  nc82Circu; "+nc82Circu);
-				
-				nc82Real=1000;
-				
-				if(nc82Amount==nc82Size && nc82Ratio==nc82Size && nc82Amount==nc82Ratio && nc82Circu==nc82Ratio && nc82Circu==nc82Amount){
-					nc82Real=nc82Amount;
-				}else{
 					
-					if(nc82Circu==nc82Ratio)
-					nc82Real=nc82Circu;
+					if(nc82Real==1000){
+						print("Could not detect nc82, just will close 1 image")
+						nc82Real=0;
+					}
 					
-					else if(nc82Amount==nc82Size)
-					nc82Real=nc82Amount;
+					selectWindow(Ch[nc82Real]);//nc82
+					close();
 					
-					else if(nc82Ratio==nc82Size)
-					nc82Real=nc82Ratio;
+					if(channels==2)
+					neuronCH=getTitle();
 					
-					else if(nc82Amount==nc82Ratio)
-					nc82Real=nc82Amount;
-				}
-				if(defaultcirc<0.1){//Circulicity thresholding
-					if(nc82Circu!=nc82Real)
-					nc82Real=nc82Circu;
+					//	setBatchMode(false);
+					//	updateDisplay();
+					//	a
 					
-					if(nc82Amount==nc82Size && nc82Ratio==nc82Size && nc82Amount==nc82Ratio)
-					nc82Real=nc82Amount;
-					
-					if(sizegap>10)//if size difference is more than 10 time, bigger is nc82
-					nc82Real=nc82Size;
-					
-				}
-				
-				if(nc82Real==1000){
-					print("Could not detect nc82, just will close 1 image")
-					nc82Real=0;
-				}
-				
-				selectWindow(Ch[nc82Real]);//nc82
-				close();
-				
-				if(channels==2)
-				neuronCH=getTitle();
-				
-				//	setBatchMode(false);
-				//	updateDisplay();
-				//	a
-				
-				titlelist=getList("image.titles");
-				imageNum=nImages();
-				print("imageNum; "+imageNum);
-				
-				if(colorcoding==1)
-				if(savemethod==1)
-				myDir2Co = dirCOLOR;
-			}//if(manual==3){
+					if(colorcoding==1)
+					if(savemethod==1)
+					myDir2Co = dirCOLOR;
+				}//if(manual==3){
+			}
+			
+			titlelist=getList("image.titles");
+			imageNum=nImages();
+			print("imageNum; "+imageNum);
 			
 			for(MIPtry=1; MIPtry<=imageNum; MIPtry++){
 				
@@ -1312,6 +1314,8 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					
 					MedianSub=70;
 					print("Channel number; "+channels);
+					eightbit=0;
+					///// pre- brightness adjustment ////////////////
 					if(bitd==8){
 						print("8bit file");
 						desiredmean=200;
@@ -1325,9 +1329,9 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						getMinAndMax(min, Inimax);
 						close();
 						
-						if(Inimax!=255){
+						if(min!=0 && Inimax!=255){
 							selectWindow(stackSt);
-							setMinAndMax(0, Inimax);
+							setMinAndMax(min, Inimax);
 							run("Apply LUT", "stack");
 						}
 						
@@ -1340,11 +1344,18 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						
 						print("3D stack brightness adjusted; maxvalue; "+maxvalue+"  Inimax; "+Inimax);
 						
+						run("16-bit");
+						bitd=16;
+						eightbit=1;
 					}//if(bitd==8){
 					
 					if(bitd==16){
+						getDimensions(width, height, channels2, slices, frames);
+						print("stack dimension; width= "+width+"  height= "+height+"  slices= "+slices);
+						
 						run("Z Project...", "projection=[Max Intensity]");
 						MIPtitle= getTitle();
+						lowerweight=0.3;
 						
 						resetMinAndMax();
 						getMinAndMax(Inimin, max);
@@ -1354,6 +1365,9 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						else if (max>4095)
 						DefMaxValue=65535;
 						else if (max<256)
+						DefMaxValue=255;
+						
+						if(	eightbit==1)
 						DefMaxValue=255;
 						
 						if(max<=255){// 8 bit file in 16bit format
@@ -1370,31 +1384,58 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						
 						RealInimax=Inimax;
 						
+						print("Inimax; "+Inimax);
 						if(DefMaxValue==255){
-							Inimax=round(Inimax*6);
+						//	Inimax=round(Inimax*6);
 							print("DefMaxValue = 255, 16 bit");
 						}
 						
-						if(DefMaxValue==4095){
-							if(Inimax<200 && Inimax>100)
-							Inimax=Inimax*3.5;
-							else if (Inimax>=200 && Inimax<300)
-							Inimax=round(Inimax*3);
-							else if (Inimax<100)
-							Inimax=Inimax*4;
-							else if (Inimax>=300 && Inimax<500)
-							Inimax=Inimax*2;
+						if(easyADJ==false){
+							if(DefMaxValue==4095){
+								if(Inimax<200 && Inimax>100)
+								Inimax=Inimax*3.5;
+								else if (Inimax>=200 && Inimax<300)
+								Inimax=round(Inimax*3);
+								else if (Inimax<100)
+								Inimax=Inimax*4;
+								else if (Inimax>=300 && Inimax<500)
+								Inimax=Inimax*2;
+							}
+							if(DefMaxValue==65535){
+								if(Inimax<3200 && Inimax>1600)
+								Inimax=round(Inimax*1.5);
+								else if (Inimax>=3200 && Inimax<4800)
+								Inimax=round(Inimax*1.2);
+								else if (Inimax<1600)
+								Inimax=round(Inimax*2);
+								else if (Inimax>=4800 && Inimax<8000)
+								Inimax=round(Inimax*1.1);
+							}
 						}
 						
-						if(DefMaxValue==65535){
-							if(Inimax<3200 && Inimax>1600)
-							Inimax=Inimax*3;
-							else if (Inimax>=3200 && Inimax<4800)
-							Inimax=round(Inimax*2.5);
-							else if (Inimax<1600)
-							Inimax=Inimax*4;
-							else if (Inimax>=4800 && Inimax<8000)
-							Inimax=Inimax*2;
+						if(easyADJ==true){
+							if(DefMaxValue==4095){
+								if(Inimax<200 && Inimax>100)
+								Inimax=round(Inimax*1.5);
+								else if (Inimax>=200 && Inimax<300)
+								Inimax=round(Inimax*1.2);
+								else if (Inimax<100)
+								Inimax=round(Inimax*2);
+								else if(Inimax<2000 && Inimax>1000)
+								Inimax=round(Inimax*0.9);
+								else if(Inimax>=2000)
+								Inimax=round(Inimax*0.8);
+							}
+							if(DefMaxValue==65535){
+								if(Inimax<3200 && Inimax>1600)
+								Inimax=round(Inimax*1.5);
+								else if (Inimax>=3200 && Inimax<4800)
+								Inimax=round(Inimax*1.2);
+								else if (Inimax<1600)
+								Inimax=round(Inimax*2);
+								else if (Inimax>=4800 && Inimax<8000)
+								Inimax=round(Inimax*1.1);
+							}
 						}
 						
 						
@@ -1402,6 +1443,39 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						
 						setMinAndMax(0, Inimax);
 						run("Apply LUT");
+						
+						if(easyADJ==true){
+							applyV=round(Inimax);
+							sumval=0; sumnumpx=0;
+							//			grayarray=newArray(65536);
+							
+							for(ixx=0; ixx<getWidth; ixx++){
+								for(iyy=0; iyy<getHeight; iyy++){
+									pixn=getPixel(ixx, iyy);
+									
+									if(pixn>1){
+										sumval=sumval+pixn;
+										sumnumpx=sumnumpx+1;
+										//				grayarray[pixn]=grayarray[pixn]+1;
+									}
+								}
+							}
+							
+							aveval = round((sumval/sumnumpx)/16);
+							print("aveval; "+aveval+"   applyV; "+applyV);
+							
+					//		if(DefMaxValue!=65535){
+					//			if(Inimax>aveval)
+					//			applyV=aveval;
+					//		}						
+						}//if(easyADJ==true){
+						
+						print("applyV 336; "+applyV);
+						
+						if(width>height)
+						expand=false;
+						else
+						expand=true;
 						
 						VNCMaskName="";
 						if(getWidth==512){
@@ -1415,7 +1489,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 									VNCMaskName="Mask_VNC_Male.tif";
 								}
 								fileOpen(FilePathArray);
-									
+								
 								zerovalue=239907;
 								
 								selectWindow(MIPtitle);
@@ -1436,6 +1510,8 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 							run("Fill", "slice");
 						}//if(getWidth==512){
 						
+						selectWindow(MIPtitle);
+						
 						total=0; // getHistogram is broke;
 						for(ix=0; ix<getWidth; ix++){
 							for(iy=0; iy<getHeight; iy++){
@@ -1446,8 +1522,6 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 								zerovalue=zerovalue+1;
 							}
 						}//for(ix=0; ix<getWidth; ix++){
-						
-						
 						
 						//		zerovalue=counts[0];
 						Inimin=round((total/((getHeight*getWidth)-zerovalue))*0.8);//239907 is female VNC size
@@ -1468,7 +1542,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 							selectWindow(stackSt);
 							
 							if(easyADJ==true || AutoBRV==1){
-								setMinAndMax(0, Inimax);
+								setMinAndMax(0, applyV);
 								run("Apply LUT", "stack");
 							}
 							
@@ -1497,7 +1571,6 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					//			setBatchMode(false);
 					//			updateDisplay();
 					//			a
-					
 					if(unsharp!="Max" && AutoBRV==1){
 						if(lowerweight>0){
 							if(getHeight==512 && getWidth==1024){
@@ -1588,7 +1661,6 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 				
 				MIP=getImageID();
 				run("Canvas Size...", "width="+round(getWidth()*0.95)+" height="+round(getHeight()*0.95)+" position=Center zero");
-				//	DefMaxValue=BasicMIP[1];//actual max value in stack
 				sigsize=0;
 				
 				print("basicoperation done");
@@ -1596,9 +1668,10 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 				//			setBatchMode(false);
 				//				updateDisplay();
 				//				a
-				applyV=1;
+		
 				
 				if(AutoBRV==1){//to get brightness value from MIP
+					applyV=1;
 					selectImage(MIP);
 					briadj=newArray(desiredmean, 0, 0, 0,lowerweight,lowthreM,autothre,maxvalue,MIP,stack,multiDSLT,secondjump);
 					autobradjustment(briadj,DSLTver,DefMaxValue);
@@ -1667,8 +1740,15 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 				stackconcatinate();
 				
 				
+				
 				if(AutoBRV==0){
+					
+					if(isOpen(origi))
 					selectWindow(origi);
+					else
+					selectWindow(neuronCH);
+					
+					if(easyADJ==false)
 					applyV=255;
 					if(bitd==16){
 						
@@ -1718,7 +1798,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 				if(CropYN)
 				CropOP(MIPtype,applyV,colorscale);
 				
-				
+				print("Line 1724");
 				TrueMaxValue=0;
 				if(DefMaxValue<4096){
 					
@@ -1728,6 +1808,8 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					
 				}else if(DefMaxValue>4095)
 				TrueMaxValue=65535;
+				
+				print(myDir2Co+origiMIP+".tif");
 				
 				if(imageNum==1){
 					if(AutoBRV==1)
