@@ -64,7 +64,7 @@ JFRC3Dpath=0;
 nc82nrrd=true;
 tempMaskDir=0;
 unsharp2=0;
-easyADJ=true;
+easyADJ=false;
 GammaON=false;
 
 if(exi==1){
@@ -171,7 +171,7 @@ if(exi==1){
 	
 }
 run("Close All");
-
+easyADJ=false;
 JaneliaVersion=0;
 
 Dialog.create("Batch processing of the Color depth MIP creation");
@@ -1398,8 +1398,10 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 								Inimax=round(Inimax*3);
 								else if (Inimax<100)
 								Inimax=Inimax*4;
-								else if (Inimax>=300 && Inimax<500)
-								Inimax=Inimax*2;
+								else if (Inimax>=300 && Inimax<500){
+									Inimax=Inimax*2;
+								
+								}
 							}
 							if(DefMaxValue==65535){
 								if(Inimax<3200 && Inimax>1600)
@@ -1438,14 +1440,14 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 							}
 						}
 						
-						
+						print("After adjusted Inimax; "+Inimax);
 						selectWindow(MIPtitle);
-						
+						//aaa
 						setMinAndMax(0, Inimax);
 						run("Apply LUT");
+						applyV=round(Inimax);
 						
 						if(easyADJ==true){
-							applyV=round(Inimax);
 							sumval=0; sumnumpx=0;
 							//			grayarray=newArray(65536);
 							
@@ -1700,6 +1702,12 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					run("Unsharp Mask...", "radius=1 mask=0.35 stack");
 					else if(unsharp=="Max")
 					run("Maximum...", "radius=1.5 stack");
+					
+					print("1704 DefMaxValue"+DefMaxValue+"  Inimax; "+Inimax+"  applyV"+applyV);
+					
+					if(DefMaxValue==4095)
+					if(applyV>4095)
+					DefMaxValue=65535;
 					
 					if(bitd==16){
 						if(DefMaxValue==4095)
@@ -1983,7 +1991,7 @@ function autobradjustment(briadj,DSLTver,DefMaxValue){
 	selectImage(MIP);//MIP
 	
 	fff=getTitle();
-	print("fff 1202; "+fff);
+	print("fff 1202; "+fff+"   desiredmean; "+desiredmean);
 	applyvv=newArray(1,bitd,stack,MIP);
 	applyVcalculation(applyvv);
 	applyV=applyvv[0];
