@@ -3,7 +3,7 @@ The algorithm created by Hideo Otsuna.
 FIJI plugins created by Hideo Otsuna and Takashi Kawase.  
 This manual is modified based on the instruction developed by Justine X Chia (UCSF).  
 
-***For EM MIP search please use this EM search [plugin] (https://github.com/JaneliaSciComp/EM_MIP_search)
+***For EM MIP search please use this EM search [plugin](https://github.com/JaneliaSciComp/EM_MIP_search)
 
 ## Before starting
  1. Launch and update FIJI.
