@@ -1987,7 +1987,7 @@ function autobradjustment(briadj,DSLTver,DefMaxValue){
 	//					updateDisplay();
 	//					a
 	
-	run("Mask_MIP_Brightness_Measure", "mask=test.tif data=MIP.tif desired="+desiredmean+"");
+	run("Mask Brightness Measure", "mask=test.tif data=MIP.tif desired="+desiredmean+"");
 	selectImage(MIP);//MIP
 	
 	fff=getTitle();
@@ -2075,7 +2075,7 @@ function autobradjustment(briadj,DSLTver,DefMaxValue){
 		
 		selectImage(MIP);//MIP
 		
-		run("Mask_MIP_Brightness_Measure", "mask=test.tif data=MIP.tif desired="+desiredmean+"");
+		run("Mask Brightness Measure", "mask=test.tif data=MIP.tif desired="+desiredmean+"");
 		
 		selectImage(MIP);//MIP
 		
