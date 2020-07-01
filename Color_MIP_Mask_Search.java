@@ -40,7 +40,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 	ImagePlus imp, imp2;
 	ImageProcessor ip1, nip1, ip2, ip3, ip4, ip5, ip6, ip33;
 	int pix1=0, CheckPost,UniqueLineName=0,IsPosi;
-	int pix3=0,Check=0,arrayPosition=0,dupdel=1,FinalAdded=1,enddup=0;;
+	int pix3=0,Check=0,arrayPosition=0,dupdel=1,FinalAdded=1,enddup=0;
 	ImagePlus newimp, newimpOri;
 	String linename,LineNo, LineNo2,preLineNo="A",FullName,LineName,arrayName,PostName;
 	String args [] = new String[10],PreFullLineName,ScorePre,TopShortLinename;
@@ -323,7 +323,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		gd.addMessage("");
 		//	gd.addSlider("100x % of Positive PX Threshold", (double) 0, (double) 10000, pixThres);
 		gd.addNumericField("Positive PX Threshold 0-100 %", pixThres, 2);
-		gd.addSlider("Pix Color Fluctuation, ± Z slice", 0, 20, pixflu);
+		gd.addSlider("Pix Color Fluctuation, +- Z slice", 0, 20, pixflu);
 		
 		gd.setInsets(20, 0, 0);
 		gd.addNumericField("Max number of the hits", maxnumberN, 0);
@@ -483,6 +483,12 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			IJ.showMessage ("Image size is different between the mask and data!  mask height; "+height+" px   data height; "+heightD+" px");
 			IJ.log("Image size is different between the mask and data!");
 			return;
+		}
+		
+		for(int ix=950; ix<width; ix++){// deleting color scale from mask
+			for(int iy=0; iy<85; iy++){
+				ip1.set(ix,iy,-16777216);
+			}
 		}
 		
 		if(IJ.escapePressed())
