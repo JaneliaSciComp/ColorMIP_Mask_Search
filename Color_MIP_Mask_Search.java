@@ -1024,6 +1024,10 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				
 				int GMRPosi=(linenameTmpo.indexOf("GMR"));
 				int RPosi=(linenameTmpo.indexOf("R_"));
+				int TRposi=(linenameTmpo.indexOf("_TR_"));
+				
+				if(TRposi!=-1)
+				RPosi=-1;
 				
 				int JRCPosi=(linenameTmpo.indexOf("JRC_"));
 				int BJDPosi=(linenameTmpo.indexOf("BJD"));
