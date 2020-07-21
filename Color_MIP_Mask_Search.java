@@ -1025,7 +1025,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				int GMRPosi=(linenameTmpo.indexOf("GMR"));
 				int RPosi=(linenameTmpo.indexOf("R_"));
 				int TRposi=(linenameTmpo.indexOf("_TR_"));
-				
+        int GLposi=(linenameTmpo.indexOf("GL_"));
+        
 				if(TRposi!=-1)
 				RPosi=-1;
 				
@@ -1035,7 +1036,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				int VTPosi=(linenameTmpo.indexOf("VT"));
 				int SSPosi=(linenameTmpo.indexOf("SS"));
 				
-				if(GMRPosi==-1 && RPosi==-1 && JRCPosi==-1 && BJDPosi==-1 && VTPosi==-1 && SSPosi==-1)
+				if(GMRPosi==-1 && RPosi==-1 && JRCPosi==-1 && BJDPosi==-1 && VTPosi==-1 && SSPosi==-1 && GLposi==-1)
 				dupline=0;
 				
 				//	IJ.log("JRCPosi; "+JRCPosi);
@@ -1054,6 +1055,11 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
 					
 					LineNo=linenameTmpo.substring(GMRPosi, UnderS2);// GMR_01A02
+				}else if(GLposi!=-1){// it is GMR 
+					int UnderS1=(linenameTmpo.indexOf("_", GLposi+1));
+					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
+					
+					LineNo=linenameTmpo.substring(GLposi, UnderS2);// GMR_01A02
 				}else if(VTPosi!=-1){//if VT
 					int UnderS1=(linenameTmpo.indexOf("_", VTPosi+1));
 					LineNo=linenameTmpo.substring(VTPosi, UnderS1);// VT00002
