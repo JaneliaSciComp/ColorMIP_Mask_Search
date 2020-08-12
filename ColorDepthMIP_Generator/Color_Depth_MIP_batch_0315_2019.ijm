@@ -665,7 +665,6 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 	dotIndexzip= -1;
 	dotIndexVNC =-1;
 	dotIndexV3raw = -1;
-	files=files+1;
 	
 	dotIndexMha = lastIndexOf(listP, "mha");
 	dotIndexV3 = lastIndexOf(listP, "c0.v3dpbd");
