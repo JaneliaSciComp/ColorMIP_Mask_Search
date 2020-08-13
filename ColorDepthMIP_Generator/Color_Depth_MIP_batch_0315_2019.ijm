@@ -798,7 +798,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 		}
 		
 		
-		if(nImages>0){
+		if(nImages>0 && nSlices>1){
 			
 			bitd=bitDepth();
 			totalslice=nSlices();
@@ -806,7 +806,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 			getDimensions(width, height, channels, slices, frames);
 			getVoxelSize(VxWidth, VxHeight, VxDepth, VxUnit);
 			
-			print("bitd; "+bitd+"  width; "+width+"  height; "+height+"  channels; "+channels"  slices; "+slices+"  frames; "+frames);
+			print("bitd; "+bitd+"  width; "+width+"  height; "+height+"  channels; "+channels+"  slices; "+slices+"  frames; "+frames);
 			
 			if(KeiNrrdShrink==1){
 				run("Size...", "width=802 height=601 constrain average interpolation=Bicubic");
@@ -1883,6 +1883,8 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 			mipbatch[30]=perimLM;
 			mipbatch[31]=defaultNoCH;
 		}//	if(nImages>0){
+		
+		run("Close All");
 	}//if(dotIndextif==-1 && dotI
 } //function mipfunction(mipbatch) { 
 ///////////////////////////////////////////////////////////////
