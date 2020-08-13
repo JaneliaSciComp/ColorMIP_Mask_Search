@@ -806,6 +806,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 			getDimensions(width, height, channels, slices, frames);
 			getVoxelSize(VxWidth, VxHeight, VxDepth, VxUnit);
 			
+			print("bitd; "+bitd+"  width; "+width+"  height; "+height+"  channels; "+channels"  slices; "+slices+"  frames; "+frames);
 			
 			if(KeiNrrdShrink==1){
 				run("Size...", "width=802 height=601 constrain average interpolation=Bicubic");
@@ -1513,7 +1514,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						
 						selectWindow(MIPtitle);
 						
-						total=0; // getHistogram is broke;
+						total=0; zerovalue=0;// getHistogram is broke;
 						for(ix=0; ix<getWidth; ix++){
 							for(iy=0; iy<getHeight; iy++){
 								pxv = getPixel(ix,iy);
@@ -2545,6 +2546,8 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		
 		print("getHeight; "+getHeight);
 		
+		tissue="UNKNOWN";
+		
 		if(getHeight==512 || getHeight==592){
 			if(getWidth==1024 || getWidth==1184){
 				tissue="Brain";
@@ -2557,7 +2560,8 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 				BackgroundMask (BackgroundMaskArray,tissue,JFRCpath,VncMaskpathF,MIPthresholding,bitd,VncMaskpathM,GammaON);
 				brightnessNeed= BackgroundMaskArray[0];
 			}
-		}else{//	if(getHeight==512 && getWidth==1024){
+		}
+		if(tissue=="UNKNOWN"){//	if(getHeight==512 && getWidth==1024){
 			
 			tissue="UNKNOWN";
 			newImage("MaskMIP.tif", "16-bit", getWidth, getHeight, 1);
