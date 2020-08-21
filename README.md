@@ -5,7 +5,7 @@ This manual is modified based on the instruction developed by Justine X Chia (UC
 
 ***For EM MIP search please use this EM search [plugin](https://github.com/JaneliaSciComp/EM_MIP_search)
 
-***Downloading Color Depth MIP is [here](https://open.quiltdata.com/b/janelia-flylight-color-depth/tree/Color_Depth_MIPs_For_Download/)
+***Downloading the Color Depth MIPs are [here](https://open.quiltdata.com/b/janelia-flylight-color-depth/tree/Color_Depth_MIPs_For_Download/)
 
 ## Before starting
  1. Launch and update FIJI.
