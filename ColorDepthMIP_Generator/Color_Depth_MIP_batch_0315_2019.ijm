@@ -41,7 +41,7 @@ MIPtype="Gen1_Gal4";
 subfolder=false;
 colorcoding=true;
 CLAHE=true;
-AutoBRV=true;
+AutoBRVST="Segmentation based automatic";
 blockposition=1;
 totalblock=1;
 blockON=false;
@@ -108,7 +108,7 @@ if(exi==1){
 		}else if(swi==3 && swi<=testline){
 			CropYN = String.buffer;
 		}else if(swi==4 && swi<=testline){
-			AutoBRV = String.buffer;
+			AutoBRVST = String.buffer;
 		}else if(swi==5 && swi<=testline){
 			totalblock = String.buffer;
 		}else if(swi==6 && swi<=testline){
@@ -171,7 +171,6 @@ if(exi==1){
 	
 }
 run("Close All");
-easyADJ=false;
 JaneliaVersion=0;
 
 Dialog.create("Batch processing of the Color depth MIP creation");
@@ -179,7 +178,8 @@ Dialog.create("Batch processing of the Color depth MIP creation");
 if(JaneliaVersion==1)
 Dialog.addCheckbox("Include sub-folder", subfolder);
 
-Dialog.addCheckbox("Automatic Brightness adjustment", AutoBRV);
+itembr=newArray("Segmentation based automatic", "Automatic 1.5% saturation (good for segmented neuron)", "No adjustment");
+Dialog.addRadioButtonGroup("Automatic Brightness adjustment", itembr, 3, 1, AutoBRVST); 
 
 if(JaneliaVersion==1)
 Dialog.addCheckbox("Crop Optic Lobe", CropYN);
@@ -220,7 +220,15 @@ Dialog.show();
 if(JaneliaVersion==1)
 subfolder=Dialog.getCheckbox();// supporting sub folders
 
-AutoBRV=Dialog.getCheckbox();//auto-brightness adjustment
+AutoBRVST=Dialog.getRadioButton();//auto-brightness adjustment
+
+easyADJ=false; AutoBRV=0;
+if(AutoBRVST=="Automatic 1.5% saturation (good for segmented neuron)")
+easyADJ=true;
+else if (AutoBRVST=="Segmentation based automatic")
+AutoBRV=1;
+
+print("easyADJ; "+easyADJ+"  AutoBRV; "+AutoBRV);
 
 if(JaneliaVersion==1)
 CropYN=Dialog.getCheckbox();//crop
@@ -398,7 +406,7 @@ for (i=startn; i<endn; i++){
 		tempMaskDir=FilePathArray[3];
 		print("JFRC3Dpath; "+JFRC3Dpath);
 		
-		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRV+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM+"\n"+unsharp2+"\n"+easyADJ+"\n"+GammaON, filepath);
+		File.saveString(MIPtype+"\n"+subfolder+"\n"+colorcoding+"\n"+CropYN+"\n"+AutoBRVST+"\n"+totalblock+"\n"+blockposition+"\n"+blockON+"\n"+desiredmean+"\n"+savestring+"\n"+colorscale+"\n"+reverse0+"\n"+startMIP+"\n"+endMIP+"\n"+usingLUT+"\n"+manualST+"\n"+lowerweight+"\n"+lowthreM+"\n"+unsharp+"\n"+expand+"\n"+secondjump+"\n"+UseSubfolderName+"\n"+JFRCpath+"\n"+VncMaskpathF+"\n"+JFRC3Dpath+"\n"+nc82nrrd+"\n"+DSLTver+"\n"+SkipDuplication+"\n"+tempMaskDir+"\n"+VncMaskpathM+"\n"+unsharp2+"\n"+easyADJ+"\n"+GammaON, filepath);
 	}//if(i==startn){
 	
 	countFile=countFile+1;
