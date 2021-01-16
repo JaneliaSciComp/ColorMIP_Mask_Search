@@ -1,7 +1,7 @@
 // need to pre-open only 1 image as dataset stack
 
 OverlapPercent=1;
-colorFlux=2;
+colorFlux=1;
 
 dir=getDirectory("Choose a Directory for 2D Mask.tif");
 list=getFileList(dir);
