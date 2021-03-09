@@ -1837,7 +1837,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					if(AutoBRV==1)
 					save(myDir2Co+origiMIP+"_CH"+MIPtry+QIvalue+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
 					else
-					save(myDir2Co+origiMIP+".tif");
+					save(myDir2Co+origiMIP+"_CH"+MIPtry+".tif");
 					
 					if(AutoBRV==1)
 					print("AutoBRV; "+AutoBRV+"   MIP saved; "+myDir2Co+origiMIP+"_CH"+MIPtry+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
