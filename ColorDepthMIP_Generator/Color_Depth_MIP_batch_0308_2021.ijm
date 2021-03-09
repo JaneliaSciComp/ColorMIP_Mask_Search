@@ -1839,6 +1839,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					else
 					save(myDir2Co+origiMIP+".tif");
 					
+					if(AutoBRV==1)
 					print("AutoBRV; "+AutoBRV+"   MIP saved; "+myDir2Co+origiMIP+"_CH"+MIPtry+applyVST+applyV+DSLTst+sigsize+threST+sigsizethre+".tif");
 				}
 				
