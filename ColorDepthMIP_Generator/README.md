@@ -4,13 +4,14 @@ FIJI plugins created by Hideo Otsuna and Takashi Kawase.
 
 
 ## Before starting
+ 0. download "Plugins_Color_MIP.zip" and decompress. Also download "Color_Depth_MIP_batch_0308_2021.ijm"
  1. Copy "Plugins_Color_MIP" folder into Fiji/Plugins/ folder (please do not change the folder name, the name of folder is using as a link to the contents of .tiff/nrrd files).
- 2. Copy "Color_Depth_MIP_batch_0315_2019.ijm" into Fiji/Plugins/Macros/ folder.
+ 2. Copy "Color_Depth_MIP_batch_0308_2021.ijm" into Fiji/Plugins/Macros/ folder.
  3. Copy "PsychedelicRainBow2.lut" into Fiji/luts/ folder.
 
 
 ## Startup
-Select menu; Pugins/Macros/Color_Depth_MIP_batch_0508_2018
+Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
 
  1. Select directory that contains 3D stacks to be color depth MIP
  2. Select directory for saving MIPs
