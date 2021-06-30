@@ -178,7 +178,7 @@ Dialog.create("Batch processing of the Color depth MIP creation");
 if(JaneliaVersion==1)
 Dialog.addCheckbox("Include sub-folder", subfolder);
 
-itembr=newArray("Segmentation based automatic", "Automatic 1.5% saturation (good for segmented neuron)", "No adjustment");
+itembr=newArray("Segmentation based automatic", "Automatic 1.5% saturation (good for segmented neuron)", "No adjustment", "Max1","Segmentation based no lower value cut");
 Dialog.addRadioButtonGroup("Automatic Brightness adjustment", itembr, 3, 1, AutoBRVST); 
 
 if(JaneliaVersion==1)
@@ -1782,7 +1782,10 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					print("Line 1518 RealapplyV; "+round(RealapplyV));
 				}
 				
-				
+				if(AutoBRVST=="Max1"){
+					setMinAndMax(0, 0);
+					run("Apply LUT", "stack");
+				}
 				ColorCoder(slices, applyV, width, AutoBRV, bitd, CLAHE, colorscale, reverse0, colorcoding, usingLUT,DefMaxValue,startMIP,endMIP,expand,GammaON);
 				
 				if(AutoBRV==1){
@@ -2500,6 +2503,9 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 				//		if(changelower>100)
 				//		changelower=100;
 				
+				if(AutoBRVST=="Segmentation based no lower value cut")
+				changelower=0;
+				
 				selectWindow(MIPapply);
 				
 				//	setBatchMode(false);
@@ -2979,6 +2985,10 @@ function brightnessapply(DefMaxValue,filepath,brightnessapplyArray,bitd,lowerwei
 		//		a
 		
 		changelower=round(changelower);
+		
+		if(AutoBRVST=="Segmentation based no lower value cut")
+		changelower=0;
+		
 		if(changelower!=0){
 			setMinAndMax(changelower, maxvalue);//subtraction
 			run("Apply LUT", "stack");
