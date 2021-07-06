@@ -450,7 +450,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		//	Prefs.set("EMsearch.boolean",EMsearch);
 		Prefs.set("maxnumberN.int",maxnumberN);
 		
-		
+		IJ.log("dupline; "+dupline+"  pixThres; "+pixThres+"  pixflu; "+pixflu);
 		double pixfludub=pixflu/100;
 		//	IJ.log(" pixfludub;"+String.valueOf(pixfludub));
 		
@@ -1025,8 +1025,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				int GMRPosi=(linenameTmpo.indexOf("GMR"));
 				int RPosi=(linenameTmpo.indexOf("R_"));
 				int TRposi=(linenameTmpo.indexOf("_TR_"));
-        int GLposi=(linenameTmpo.indexOf("GL_"));
-        
+				int GLposi=(linenameTmpo.indexOf("GL_"));
+				
 				if(TRposi!=-1)
 				RPosi=-1;
 				
@@ -1039,48 +1039,51 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				if(GMRPosi==-1 && RPosi==-1 && JRCPosi==-1 && BJDPosi==-1 && VTPosi==-1 && SSPosi==-1 && GLposi==-1)
 				dupline=0;
 				
-				//	IJ.log("JRCPosi; "+JRCPosi);
-				
-				if(JRCPosi!=-1)
-				RPosi=-1;
-				
-				if(RPosi!=-1 && GMRPosi==-1){// it is R
+				if(dupline>0){
+					//	IJ.log("JRCPosi; "+JRCPosi);
 					
-					int UnderS2=(linenameTmpo.indexOf("_", RPosi+2 ));// end of line number
+					if(JRCPosi!=-1)
+					RPosi=-1;
 					
-					LineNo=linenameTmpo.substring(RPosi+2, UnderS2);// R_01A02
-					//			IJ.log("LineNo; "+LineNo);
-				}else if(GMRPosi!=-1){// it is GMR 
-					int UnderS1=(linenameTmpo.indexOf("_", GMRPosi+1));
-					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
-					
-					LineNo=linenameTmpo.substring(GMRPosi, UnderS2);// GMR_01A02
-				}else if(GLposi!=-1){// it is GMR 
-					int UnderS1=(linenameTmpo.indexOf("_", GLposi+1));
-					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
-					
-					LineNo=linenameTmpo.substring(GLposi, UnderS2);// GMR_01A02
-				}else if(VTPosi!=-1){//if VT
-					int UnderS1=(linenameTmpo.indexOf("_", VTPosi+1));
-					LineNo=linenameTmpo.substring(VTPosi, UnderS1);// VT00002
-				}else if(JRCPosi!=-1){
-					int UnderS1=(linenameTmpo.indexOf("_", JRCPosi+1));
-					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
-					
-					LineNo=linenameTmpo.substring(JRCPosi, UnderS2);// GMR_01A02
-				}else if(BJDPosi!=-1){
-					int UnderS1=(linenameTmpo.indexOf("_", BJDPosi+1));
-					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
-					
-					LineNo=linenameTmpo.substring(BJDPosi, UnderS2);// GMR_01A02
-				}else if(SSPosi!=-1){
-					int UnderS1=(linenameTmpo.indexOf("_", SSPosi+1));
-					int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
-					
-					LineNo=linenameTmpo.substring(SSPosi, UnderS2);// GMR_01A02
-				}else{
-					LineNo=linenameTmpo.substring(0, DotPosi);
-				}
+					if(RPosi!=-1 && GMRPosi==-1){// it is R
+						
+						int UnderS2=(linenameTmpo.indexOf("_", RPosi+2 ));// end of line number
+						
+						LineNo=linenameTmpo.substring(RPosi+2, UnderS2);// R_01A02
+						//			IJ.log("LineNo; "+LineNo);
+					}else if(GMRPosi!=-1){// it is GMR 
+						int UnderS1=(linenameTmpo.indexOf("_", GMRPosi+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
+						
+						LineNo=linenameTmpo.substring(GMRPosi, UnderS2);// GMR_01A02
+					}else if(GLposi!=-1){// it is GMR 
+						int UnderS1=(linenameTmpo.indexOf("_", GLposi+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
+						
+						LineNo=linenameTmpo.substring(GLposi, UnderS2);// GMR_01A02
+					}else if(VTPosi!=-1){//if VT
+						int UnderS1=(linenameTmpo.indexOf("_", VTPosi+1));
+						LineNo=linenameTmpo.substring(VTPosi, UnderS1);// VT00002
+					}else if(JRCPosi!=-1){
+						int UnderS1=(linenameTmpo.indexOf("_", JRCPosi+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
+						
+						LineNo=linenameTmpo.substring(JRCPosi, UnderS2);// GMR_01A02
+					}else if(BJDPosi!=-1){
+						int UnderS1=(linenameTmpo.indexOf("_", BJDPosi+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
+						
+						LineNo=linenameTmpo.substring(BJDPosi, UnderS2);// GMR_01A02
+					}else if(SSPosi!=-1){
+						int UnderS1=(linenameTmpo.indexOf("_", SSPosi+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));
+						
+						LineNo=linenameTmpo.substring(SSPosi, UnderS2);// GMR_01A02
+					}else{
+						LineNo=linenameTmpo.substring(0, DotPosi);
+					}
+				}else//	if(dupline>0){
+				LineNo=linenameTmpo.substring(0, DotPosi);
 				
 				String posipersent2ST;
 				if(labelmethod==0 || labelmethod==1){// on top score
