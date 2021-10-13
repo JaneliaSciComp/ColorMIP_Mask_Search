@@ -32,9 +32,9 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
 - Skeleton bolded MIP: if the .nrrd is from CATMAID, this needs to be ON.
 <br>
 <b>DSLT version</b><br><br>
- Normal: this is segmented fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment.<br>
- Line: more neuron fiber specific segmentation and less background effects for the brightness adjustment
-
+ - Normal: this is segmented fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment.<br>
+ - Line: more neuron fiber specific segmentation and less background effects for the brightness adjustment
+<br><br>
  - Starting MIP slice: 0 is from beginning of 3D stack.
  - Ending MIP slice: 1000 will be until end of 3D stack.
 
