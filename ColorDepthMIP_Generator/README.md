@@ -31,7 +31,7 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
  - Skip MIP creation if already present in the save directory: will skip MIP creation if the MIP file exists within the save directory
 - Skeleton bolded MIP: if the .nrrd is from CATMAID, this needs to be ON.
 <br>
-<b>DSLT version</b><br>
+<b>DSLT version</b><br><br>
  Normal: Basically neuron fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment
 
  Line: More sensitive for the neuron fiber based brightness adjustment.
