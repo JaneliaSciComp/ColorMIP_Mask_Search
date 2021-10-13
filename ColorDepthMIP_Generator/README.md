@@ -18,7 +18,13 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
  
 ![ScreenShot0](../../images/CDM_generator.png)
 ### Parameters:
- - Automatic Brightness adjustment: Automatic brightness adjustment ON/OFF.
+ - Automatic Brightness adjustment: 
+"Segmentation based automatic" applying neuron segmentation and adjust brightness based on the segmented neurons. Background value is also clipped and lowered. But it takes more time to create CDM.
+"Automatic 1.5% saturation (good for segmented neuron)" quick brightness adjustment
+"Max1" set value 1 as max value. This mode is good for EM skeleton.nrrd
+"Segmentation based no lower value cut" neuron brightness is adjusted based on the segmentation, however, no-background clipping. This mode is good for 3D segmented neuron without background signals.
+
+Automatic brightness adjustment ON/OFF.
  - Add color scale: Adding the color scale bar on the right top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
  - Reversed color: The order of color is reversed with ON setting.
  - VNC (Expand canvas for scale-bar): If the sample is aligned to VNC, this setting needs to be ON.
