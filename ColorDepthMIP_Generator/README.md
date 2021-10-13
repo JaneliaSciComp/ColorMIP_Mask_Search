@@ -24,14 +24,14 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
 • "Max1": set value 1 as max value. This mode is good for EM skeleton.nrrd.<br>
 • "Segmentation based no lower value cut": neuron brightness is adjusted based on the segmentation, however, no-background clipping. This mode is good for 3D segmented neuron without background signals.<br><br>
 
-Automatic brightness adjustment ON/OFF.
+<b>Automatic brightness adjustment</b>
  - Add color scale: Adding the color scale bar on the right top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
  - Reversed color: The order of color is reversed with ON setting.
  - Apply Gamma 1.4: Gamma 1.4 applied, dimmer signals become brighter.
  - Skip MIP creation if already present in the save directory: will skip MIP creation if the MIP file exists within the save directory
 - Skeleton bolded MIP: if the .nrrd is from CATMAID, this needs to be ON.
 <br>
-DSLT version
+<b>DSLT version</b><br>
  Normal: Basically neuron fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment
 
  Line: More sensitive for the neuron fiber based brightness adjustment.
