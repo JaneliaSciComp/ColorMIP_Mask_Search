@@ -195,7 +195,7 @@ if(JaneliaVersion==1)
 Dialog.addCheckbox("MIP craetion from all .nrrd", nc82nrrd);
 Dialog.addCheckbox("Skip MIP creation for already made in the save directory", SkipDuplication);
 
-Dialog.addCheckbox("Skeleton MIP", unsharp2);
+Dialog.addCheckbox("Skeleton bolded MIP", unsharp2);
 
 if(JaneliaVersion==1){
 	itemFilter=newArray("NA", "Unsharp", "Max");
