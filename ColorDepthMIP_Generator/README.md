@@ -29,8 +29,9 @@ Automatic brightness adjustment ON/OFF.
  - Reversed color: The order of color is reversed with ON setting.
  - Apply Gamma 1.4: Gamma 1.4 applied, dimmer signals become brighter.
  - Skip MIP creation if already present in the save directory: will skip MIP creation if the MIP file exists within the save directory
-- Skeleton bolded MIP: if the .nrrd is from CATMAID, this need to be ON.
-
+- Skeleton bolded MIP: if the .nrrd is from CATMAID, this needs to be ON.
+<br>
+DSLT version
  Normal: Basically neuron fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment
 
  Line: More sensitive for the neuron fiber based brightness adjustment.
