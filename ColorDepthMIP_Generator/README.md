@@ -19,17 +19,17 @@ Select menu; Pugins/Macros/Color_Depth_MIP_batch_0308_2021
 ![ScreenShot0](../../images/CDM_generator.png)
 ### Parameters:
  - Automatic Brightness adjustment: <br>
-• "Segmentation based automatic" applying neuron segmentation and adjust brightness based on the segmented neurons. Background value is also clipped and lowered. But it takes more time to create CDM.<br>
-• "Automatic 1.5% saturation (good for segmented neuron)" quick brightness adjustment.<br>
-• "Max1" set value 1 as max value. This mode is good for EM skeleton.nrrd.<br>
-• "Segmentation based no lower value cut" neuron brightness is adjusted based on the segmentation, however, no-background clipping. This mode is good for 3D segmented neuron without background signals.<br><br>
+• "Segmentation based automatic": applying neuron segmentation and adjust brightness based on the segmented neurons. Background value is also clipped and lowered. But it takes more time to create CDM.<br>
+• "Automatic 1.5% saturation (good for segmented neuron)": quick brightness adjustment.<br>
+• "Max1": set value 1 as max value. This mode is good for EM skeleton.nrrd.<br>
+• "Segmentation based no lower value cut": neuron brightness is adjusted based on the segmentation, however, no-background clipping. This mode is good for 3D segmented neuron without background signals.<br><br>
 
 Automatic brightness adjustment ON/OFF.
  - Add color scale: Adding the color scale bar on the right top. If you are creating the searching mask from the segmented 3D stack, this needs to be OFF.
  - Reversed color: The order of color is reversed with ON setting.
- - VNC (Expand canvas for scale-bar): If the sample is aligned to VNC, this setting needs to be ON.
+ - Apply Gamma 1.4: Gamma 1.4 applied, dimmer signals become brighter.
  - Skip MIP creation if already present in the save directory: will skip MIP creation if the MIP file exists within the save directory
-- DSLT version:
+- Skeleton bolded MIP: if the .nrrd is from CATMAID, this need to be ON.
 
  Normal: Basically neuron fiber based brightness adjustment. However, this mode will account more background signals for the brightness adjustment
 
