@@ -35,6 +35,7 @@ import ij.io.*;
 import ij.plugin.filter.*;
 import ij.process.*;
 import ij.process.ImageProcessor;
+import ij.measure.ResultsTable;
 
 public class Color_MIP_Mask_Search implements PlugInFilter
 {
@@ -309,7 +310,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		gd.setInsets(0, 340, 0);
 		gd.addCheckbox("Horizontal ", horizontal); //Horizontal
 		gd.setInsets(5, 0, 0);
-
+		
 		gd.addChoice("Mask", titles, titles[Mask]); //Mask
 		gd.addSlider("1.Threshold for mask", 0, 255, Thresm);
 		gd.setInsets(0, 340, 0);
@@ -406,7 +407,9 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		if(GCON==true)
 		System.gc();
 		
-		if(logon==true){
+		int tz=0;
+		
+		if(logon==true && tz==1){
 			GenericDialog gd2 = new GenericDialog("log option");
 			gd2.addCheckbox("ShowNaN",logNan);
 			
@@ -573,7 +576,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				}
 			}
 			
-			IJ.log("compressio; "+fileformat);
+			IJ.log("compression; "+fileformat);
 		}
 		
 		ArrayList<String> srlabels = new ArrayList<String>();
@@ -592,7 +595,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			if (st3.isVirtual()) {
 				final VirtualStack vst = (VirtualStack)st3;
 				if (vst.getDirectory() == null) {
-					IJ.log("Virtual Stack (stack)");
+					IJ.log("Virtual Stack (tif none)");
 					
 					if (fileformat.equals("tif none")) {
 						final FileInfo fi = idata.getOriginalFileInfo();
@@ -700,7 +703,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 							
 							final TiffDecoder tfd = new TiffDecoder(fi.directory, fi.fileName);
 							final FileInfo[] fi_list = tfd.getTiffInfo();
-							IJ.log(fi_list[0].toString());
+							IJ.log(fi_list[0].toString()+"virtual stack PackBits"+"  flogon; "+flogon);
 							
 							final List<Callable<ArrayList<SearchResult>>> tasks = new ArrayList<Callable<ArrayList<SearchResult>>>();
 							for (int ithread = 0; ithread < threadNum; ithread++) {
@@ -1037,6 +1040,9 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		if(posislice>0){// if result is exist
 			int posislice2=posislice;
 			
+			//		if(logon==true)
+			ResultsTable rt = new ResultsTable();
+			
 			if(posislice==1)
 			dupline=0;
 			String linenameTmpo;
@@ -1044,8 +1050,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			for(int CreateLineArray=0; CreateLineArray<posislice; CreateLineArray++){
 				linenameTmpo = srlabels.get(CreateLineArray);
 				
-
-
+				
+				
 				int LineBeginIndex=(linenameTmpo.indexOf("MB"));
 				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("GMR"));
@@ -1075,18 +1081,18 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				int DotPosi=(linenameTmpo.indexOf("."));
 				
 				if(LineBeginIndex==-1)
-				LineBeginIndex=0;
+				LineBeginIndex=(linenameTmpo.indexOf("_"));
 				//dupline=0;
 				
 				
-	
+				
 				if(dupline>0){
 					//	IJ.log("JRCPosi; "+JRCPosi);
 					
 					int hyphen=(linenameTmpo.indexOf("-", 0 ));
 					
 					if(LineBeginIndex!=-1){
-		
+						
 						if(hyphen==-1){
 							int UnderS1=(linenameTmpo.indexOf("_", LineBeginIndex+1));
 							int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
@@ -1096,13 +1102,19 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 							LineNo=linenameTmpo.substring(0, DotPosi);
 						}else
 						LineNo=linenameTmpo.substring(LineBeginIndex, hyphen);// GMR_01A02
+						
+					//	IJ.log("LineNo; "+LineNo);
+						
 					}else{
+						if(hyphen!=-1)
+						LineNo=linenameTmpo.substring(0, hyphen);
+						else
 						LineNo=linenameTmpo.substring(0, DotPosi);
 					}
 				}else//	if(dupline>0){
 				LineNo=linenameTmpo.substring(0, DotPosi);
 				
-			//	IJ.log("linenameTmpo; "+linenameTmpo+"dupline; "+dupline+"  LineBeginIndex; "+LineBeginIndex+"  LineNo; "+LineNo);
+				//	IJ.log("linenameTmpo; "+linenameTmpo+"dupline; "+dupline+"  LineBeginIndex; "+LineBeginIndex+"  LineNo; "+LineNo);
 				String posipersent2ST;
 				if(labelmethod==0 || labelmethod==1){// on top score
 					int UnderS0=(linenameTmpo.indexOf("_"));
@@ -1496,8 +1508,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 															//	posislice2=posislice2-1;
 															//	posislice2=dcStack.size();
 															
-															if(DUPlogon==true)
-															IJ.log("   "+FinalAdded+"  Added Slice; "+FullLinenamePosi2);
+															//			if(logon==true)
+															//			IJ.log(String.valueOf(FinalAdded)+"  Added Slice; "+FullLinenamePosi2);
 															
 															FinalAdded=FinalAdded+1;
 															LineNameArray[PosiSliceScan+AddedSlice]="Deleted";
@@ -1610,6 +1622,12 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			
 			ImageStack dcStackfinal = new ImageStack (width,height);
 			ImageStack OrigiStackfinal = new ImageStack (width,height);
+			
+			int[] m_mask2;
+			m_mask2 = get_mskpos_array(ip1, Thresm);
+			
+			
+			
 			//	VirtualStack OrigiStackfinal = new VirtualStack (width,height);
 			int slnum =0;
 			try {
@@ -1650,6 +1668,27 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 										int blue2 = impxs[i+2] & 0xff;
 										int pix2 = 0xff000000 | (red2 << 16) | (green2 << 8) | blue2;
 										cp.set(id, pix2);
+									}
+									
+									int underindex = label.indexOf("_");
+									String scoreST2 = label.substring(0,underindex);
+									double scorepercentdouble = Double.parseDouble(scoreST2);
+									double percentscore= scorepercentdouble*100;
+									
+									double matchingpxnumDub = (scorepercentdouble*m_mask2.length)/100;
+									int matchingpxnum = (int) matchingpxnumDub;
+									
+									String lineName = label.substring(underindex+1,label.length());
+									
+									if(logon==true){
+										IJ.log("Mask px size;	"+m_mask2.length+"	positive px num;	"+matchingpxnum+"	ratio;	"+scoreST2+"	"+lineName);
+										
+										rt.incrementCounter();
+										rt.addValue("Mask px size", m_mask2.length);//median value
+										rt.addValue("positive px num", matchingpxnum);//number of the pixels
+										rt.addValue("ratio", scoreST2);//number of the pixels
+										rt.addValue("Line", lineName);//number of the pixels
+										
 									}
 									OrigiStackfinal.addSlice(label, cp);
 									
@@ -1718,6 +1757,25 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 											cp.set(id, pix2);
 										}
 										
+										int underindex = label.indexOf("_");
+										String scoreST2 = label.substring(0,underindex);
+										double scorepercentdouble = Double.parseDouble(scoreST2);
+										double percentscore= scorepercentdouble*100;
+										
+										double matchingpxnumDub = (scorepercentdouble*m_mask2.length)/100;
+										int matchingpxnum = (int) matchingpxnumDub;
+										
+										String lineName = label.substring(underindex+1,label.length());
+										
+										if(logon==true){
+											IJ.log("Mask px size;	"+m_mask2.length+"	positive px num;	"+matchingpxnum+"	ratio;	"+scoreST2+"	"+lineName);
+											rt.incrementCounter();
+											rt.addValue("Mask px size", m_mask2.length);//median value
+											rt.addValue("positive px num", matchingpxnum);//number of the pixels
+											rt.addValue("ratio", scoreST2);//number of the pixels
+											rt.addValue("Line", lineName);//number of the pixels
+											
+										}
 										OrigiStackfinal.addSlice(label, cp);
 										
 										if (ShowCo) {
@@ -1745,6 +1803,25 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 						String label = finallbs.get(s);
 						SearchResult sr = srdict.get(label);
 						if (sr != null) {
+							
+							int underindex = label.indexOf("_");
+							String scoreST2 = label.substring(0,underindex);
+							double scorepercentdouble = Double.parseDouble(scoreST2);
+							double percentscore= scorepercentdouble*100;
+							
+							double matchingpxnumDub = (scorepercentdouble*m_mask2.length)/100;
+							int matchingpxnum = (int) matchingpxnumDub;
+							
+							String lineName = label.substring(underindex+1,label.length());
+							
+							if(logon==true){
+								IJ.log("Mask px size;	"+m_mask2.length+"	positive px num;	"+matchingpxnum+"	ratio;	"+scoreST2+"	"+lineName);
+								rt.incrementCounter();
+								rt.addValue("Mask px size", m_mask2.length);//median value
+								rt.addValue("positive px num", matchingpxnum);//number of the pixels
+								rt.addValue("ratio", scoreST2);//number of the pixels
+								rt.addValue("Line", lineName);//number of the pixels
+							}
 							OrigiStackfinal.addSlice(label, sr.m_iporg);
 							if (ShowCo) dcStackfinal.addSlice(label, sr.m_ipcol);
 						}
@@ -1788,7 +1865,11 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				}//if(slnum>0){
 			}
 			
+			if(logon==true)
+			rt.show("Results");
 		}//if(posislice>0){
+		
+		
 		
 		end = System.currentTimeMillis();
 		//		int gap=(int)(end-start)/1000;
@@ -1955,7 +2036,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			m_mirror = mirror_mask;
 			m_mirrorneg = mirror_negmask;
 			m_xyshift = xyshift;
-
+			
 			m_horizontal = horizontal;
 			
 			//shifting
@@ -2153,9 +2234,9 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		public int calc_scoreb(ImageProcessor src, int[] srcmaskposi, byte[] tar, int[] tarmaskposi, int th, double pixfludub, byte[] coloc_out) {
 			int masksize = srcmaskposi.length <= tarmaskposi.length ? srcmaskposi.length : tarmaskposi.length;
 			int posi = 0;
-
+			
 			int center = m_width * m_height / 2;
-
+			
 			HashSet<Integer> scset = new HashSet<Integer>();
 			for(int masksig=0; masksig<masksize; masksig++){
 				
@@ -2187,32 +2268,32 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 							if (tarmaskposi[masksig] >= center)
 							{
 								if (!scset.contains(tarmaskposi[masksig]-center))
-									posi++;
+								posi++;
 							}
 							else
-								scset.add(tarmaskposi[masksig]);
+							scset.add(tarmaskposi[masksig]);
 						}
 						else
-							posi++;
+						posi++;
 					}
 					
 				}
 			}
-
+			
 			if (m_horizontal)
-				posi += scset.size();
+			posi += scset.size();
 			
 			return posi;
 			
 		}
-
-		public int calc_score(ImageProcessor src, int[] srcmaskposi, ImageProcessor tar, int[] tarmaskposi, int th, double pixfludub, ImageProcessor coloc_out) {
 		
+		public int calc_score(ImageProcessor src, int[] srcmaskposi, ImageProcessor tar, int[] tarmaskposi, int th, double pixfludub, ImageProcessor coloc_out) {
+			
 			int masksize = srcmaskposi.length <= tarmaskposi.length ? srcmaskposi.length : tarmaskposi.length;
 			int posi = 0;
-
+			
 			int center = m_width * m_height / 2;
-
+			
 			HashSet<Integer> scset = new HashSet<Integer>();
 			for(int masksig=0; masksig<masksize; masksig++){
 				
@@ -2234,26 +2315,26 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 					
 					if(pxGap<=pixfludub){
 						if(coloc_out!=null)
-							coloc_out.set(tarmaskposi[masksig], pix2);
+						coloc_out.set(tarmaskposi[masksig], pix2);
 						
 						if (m_horizontal)
 						{
 							if (tarmaskposi[masksig] >= center)
 							{
 								if (!scset.contains(tarmaskposi[masksig]-center))
-									posi++;
+								posi++;
 							}
 							else
-								scset.add(tarmaskposi[masksig]);
+							scset.add(tarmaskposi[masksig]);
 						}
 						else
-							posi++;
+						posi++;
 					}	
 				}
 			}
-
+			
 			if (m_horizontal)
-				posi += scset.size();
+			posi += scset.size();
 			
 			return posi;
 			
