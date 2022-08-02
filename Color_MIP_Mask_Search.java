@@ -1058,6 +1058,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("VT"));
 				if(LineBeginIndex==-1)
+				LineBeginIndex=(linenameTmpo.indexOf("JRC_"));
+				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("_TR_"));
 				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("R_"));
@@ -1070,19 +1072,21 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("BJD"));
 				if(LineBeginIndex==-1)
+				LineBeginIndex=(linenameTmpo.indexOf("SS"));
+				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("UAH"));
 				if(LineBeginIndex==-1)
 				LineBeginIndex=(linenameTmpo.indexOf("OL"));
-				if(LineBeginIndex==-1)
-				LineBeginIndex=(linenameTmpo.indexOf("JRC_"));
-				else if(LineBeginIndex==-1)
-				LineBeginIndex=(linenameTmpo.indexOf("SS"));
 				
 				int DotPosi=(linenameTmpo.indexOf("."));
 				
 				if(LineBeginIndex==-1)
+<<<<<<< HEAD
 				LineBeginIndex=(linenameTmpo.indexOf("_"));
 				//dupline=0;
+=======
+				dupline=0;
+>>>>>>> parent of b45e1ea (Fiji plugin)
 				
 				
 				
@@ -1092,6 +1096,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 					int hyphen=(linenameTmpo.indexOf("-", 0 ));
 					
 					if(LineBeginIndex!=-1){
+<<<<<<< HEAD
 						
 						if(hyphen==-1){
 							int UnderS1=(linenameTmpo.indexOf("_", LineBeginIndex+1));
@@ -1101,6 +1106,14 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 							else 
 							LineNo=linenameTmpo.substring(0, DotPosi);
 						}else
+=======
+						int UnderS1=(linenameTmpo.indexOf("_", LineBeginIndex+1));
+						int UnderS2=(linenameTmpo.indexOf("_", UnderS1+1 ));// end of line number
+						
+						if(hyphen==-1)
+						LineNo=linenameTmpo.substring(LineBeginIndex, UnderS2);// GMR_01A02
+						else
+>>>>>>> parent of b45e1ea (Fiji plugin)
 						LineNo=linenameTmpo.substring(LineBeginIndex, hyphen);// GMR_01A02
 						
 					//	IJ.log("LineNo; "+LineNo);
@@ -1114,7 +1127,11 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				}else//	if(dupline>0){
 				LineNo=linenameTmpo.substring(0, DotPosi);
 				
+<<<<<<< HEAD
 				//	IJ.log("linenameTmpo; "+linenameTmpo+"dupline; "+dupline+"  LineBeginIndex; "+LineBeginIndex+"  LineNo; "+LineNo);
+=======
+			//	IJ.log("dupline; "+dupline+"  LineBeginIndex; "+LineBeginIndex+"  LineNo; "+LineNo);
+>>>>>>> parent of b45e1ea (Fiji plugin)
 				String posipersent2ST;
 				if(labelmethod==0 || labelmethod==1){// on top score
 					int UnderS0=(linenameTmpo.indexOf("_"));
