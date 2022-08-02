@@ -6,7 +6,10 @@ import java.util.Collections;
 import java.util.HashMap;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 import java.util.HashSet;
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
@@ -314,10 +317,13 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		GenericDialog gd = new GenericDialog("ColorMIP_3D_Mask search");
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 		gd.setInsets(0, 340, 0);
 		gd.addCheckbox("Horizontal ", horizontal); //Horizontal
 		gd.setInsets(5, 0, 0);
 		
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
@@ -507,6 +513,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 		
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if (horizontal)
 		{
 			for(int ix=950; ix<width; ix++){// deleting color scale from mask
@@ -524,6 +531,11 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 				for(int iy=0; iy<85; iy++){
 					ip1.set(ix,iy,-16777216);
 				}
+=======
+		for(int ix=950; ix<width; ix++){// deleting color scale from mask
+			for(int iy=0; iy<85; iy++){
+				ip1.set(ix,iy,-16777216);
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 		for(int ix=950; ix<width; ix++){// deleting color scale from mask
 			for(int iy=0; iy<85; iy++){
@@ -2332,8 +2344,11 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			m_xyshift = xyshift;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 			
 			m_horizontal = horizontal;
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
@@ -2535,10 +2550,13 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			int posi = 0;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 			
 			int center = m_width * m_height / 2;
 			
 			HashSet<Integer> scset = new HashSet<Integer>();
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
@@ -2569,6 +2587,7 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 						}
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 						
 						if (m_horizontal)
 						{
@@ -2585,11 +2604,14 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 						posi++;
 					}
 					
 				}
 			}
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 			
@@ -2599,10 +2621,13 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 			
 			return posi;
 			
 		}
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 		
@@ -2881,6 +2906,8 @@ public class Color_MIP_Mask_Search implements PlugInFilter
 			
 			return pxGap;
 		}
+=======
+>>>>>>> parent of f1d5276 (horizontal image)
 =======
 >>>>>>> parent of f1d5276 (horizontal image)
 =======
