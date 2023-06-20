@@ -7,7 +7,7 @@ This manual is modified based on the instruction developed by Justine X Chia (UC
 
 ***Downloading the Color Depth MIPs are [here](https://open.quiltdata.com/b/janelia-flylight-color-depth/tree/Color_Depth_MIPs_For_Download/)
 
-***The unisex brain template for the CDM resolution is [here](https://open.quiltdata.com/b/janelia-flylight-color-depth/tree/alignment_templates/JRC2018_UNISEX_20x_HR.nrrd)
+***The unisex brain template for the CDM resolution can be found [here](https://open.quiltdata.com/b/janelia-flylight-color-depth/tree/alignment_templates/JRC2018_UNISEX_20x_HR.nrrd)
 
 ## Before starting
  1. Launch and update FIJI.
