@@ -1308,7 +1308,7 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 					stack=getImageID();
 					
 					
-					if(bitd==32 || unsharp=="Max"){
+					if(unsharp=="Max"){
 						setMinAndMax(0, 1);
 						run("8-bit");
 						bitd=8;
@@ -1357,6 +1357,17 @@ function mipfunction(nc82nrrd,mipbatch,easyADJ,GammaON) {
 						eightbit=1;
 					}//if(bitd==8){
 					
+					if(bitd==32){
+						run("Z Project...", "projection=[Max Intensity]");
+						resetMinAndMax();
+						getMinAndMax(Inimin, max);
+						close();
+						
+						selectWindow(stackSt);
+						setMinAndMax(Inimin, max);
+						run("16-bit");
+						bitd=16;
+					}
 					if(bitd==16){
 						getDimensions(width, height, channels2, slices, frames);
 						print("stack dimension; width= "+width+"  height= "+height+"  slices= "+slices);
